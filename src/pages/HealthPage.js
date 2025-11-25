@@ -3,7 +3,7 @@ import React from "react";
 
 const HEALTH_SECTIONS = [
   {
-    title: "最重要的主線基礎任務",
+    title: "主線基礎任務",
     items: [
       {
         q: "1）每天吃到 BMR 基礎代謝，蛋白質吃足量",
@@ -34,7 +34,7 @@ const HEALTH_SECTIONS = [
     ],
   },
   {
-    title: "不一定要馬上做到，但長期可以努力的方向",
+    title: "長期可以努力的方向",
     items: [
       {
         q: "4）盡量多吃原型食物",
