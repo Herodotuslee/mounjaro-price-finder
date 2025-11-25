@@ -118,6 +118,17 @@ function PricePage() {
     return value;
   };
 
+  // 更新日期顯示（全部顯示，只要有 last_updated；沒有就空）
+  const formatLastUpdated = (lastUpdatedRaw) => {
+    if (!lastUpdatedRaw) return "";
+    const d = new Date(lastUpdatedRaw);
+    if (Number.isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}/${m}/${day}`;
+  };
+
   // 🔹 Fetch data from Supabase
   useEffect(() => {
     async function fetchData() {
@@ -312,12 +323,14 @@ function PricePage() {
                 <th>名稱</th>
                 <th>5 mg 價格</th>
                 <th>10 mg 價格</th>
+                <th>更新日期</th>
                 <th>備註</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.map((item, index) => {
                 const effectiveType = normalize(item.type) || "clinic";
+                const lastUpdatedText = formatLastUpdated(item.last_updated);
 
                 return (
                   <tr key={`${item.id}-${index}`}>
@@ -329,6 +342,18 @@ function PricePage() {
                     <td>{item.clinic}</td>
                     <td>{formatPrice(item.price5mg)}</td>
                     <td>{formatPrice(item.price10mg)}</td>
+                    <td>
+                      {lastUpdatedText && (
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: "#9ca3af", // 淡灰色，不會太顯眼
+                          }}
+                        >
+                          {lastUpdatedText}
+                        </span>
+                      )}
+                    </td>
                     <td className="table-note">{item.note || "-"}</td>
                   </tr>
                 );
@@ -337,7 +362,7 @@ function PricePage() {
               {!loading && filteredData.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     style={{ textAlign: "center", padding: "12px" }}
                   >
                     目前沒有符合條件的資料。
