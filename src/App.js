@@ -15,12 +15,12 @@ function App() {
           <ul className="nav-links">
             <li>
               <NavLink to="/" end className="nav-item">
-                價格比價
+                全國價格資訊
               </NavLink>
             </li>
             <li>
               <NavLink to="/faq" className="nav-item">
-                與猛健樂有關的常見問題
+                猛健樂有關的常見問題
               </NavLink>
             </li>
             <li>
