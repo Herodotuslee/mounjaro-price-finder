@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/mounjaro-price-finder/static/css/main.aee4a60f.css",
-    "main.js": "/mounjaro-price-finder/static/js/main.07a3a5ab.js",
+    "main.js": "/mounjaro-price-finder/static/js/main.d8e2e289.js",
     "index.html": "/mounjaro-price-finder/index.html",
     "main.aee4a60f.css.map": "/mounjaro-price-finder/static/css/main.aee4a60f.css.map",
-    "main.07a3a5ab.js.map": "/mounjaro-price-finder/static/js/main.07a3a5ab.js.map"
+    "main.d8e2e289.js.map": "/mounjaro-price-finder/static/js/main.d8e2e289.js.map"
   },
   "entrypoints": [
     "static/css/main.aee4a60f.css",
-    "static/js/main.07a3a5ab.js"
+    "static/js/main.d8e2e289.js"
   ]
 }
