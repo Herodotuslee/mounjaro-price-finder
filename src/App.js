@@ -11,7 +11,20 @@ function App() {
       {/* 🔹 Navigation Bar */}
       <nav className="navbar">
         <div className="nav-container">
-          <div className="logo">台灣猛健樂資訊網</div>
+          <NavLink
+            to="/"
+            style={{
+              textDecoration: "none",
+              fontWeight: 700,
+              fontSize: 22,
+              color: "#0f172a",
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.target.style.color = "#2563eb")}
+            onMouseLeave={(e) => (e.target.style.color = "#0f172a")}
+          >
+            全國猛健樂資訊網
+          </NavLink>
           <ul className="nav-links">
             <li>
               <NavLink to="/" end className="nav-item">

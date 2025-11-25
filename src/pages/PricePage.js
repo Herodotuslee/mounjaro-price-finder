@@ -122,7 +122,7 @@ function PricePage() {
         <h1
           style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "6px" }}
         >
-          台灣各城市猛健樂價格整理（5mg / 10mg）
+          全台猛健樂價格整理（5mg / 10mg）
         </h1>
 
         {/* 🔶 免責聲明 */}
