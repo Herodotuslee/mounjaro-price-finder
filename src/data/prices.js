@@ -52,29 +52,24 @@ export const CITY_KEYWORDS = {
   taichung: ["taichung", "台中", "臺中", "台中市", "臺中市"],
   tainan: ["tainan", "台南", "臺南", "台南市", "臺南市"],
   kaohsiung: ["kaohsiung", "高雄", "高雄市"],
-
   keelung: ["keelung", "基隆", "基隆市"],
   hsinchu: ["hsinchu", "新竹", "新竹市"],
   hsinchu_county: ["hsinchu county", "新竹縣"],
-
   miaoli: ["miaoli", "苗栗", "苗栗縣"],
   changhua: ["changhua", "彰化", "彰化縣"],
   nantou: ["nantou", "南投", "南投縣"],
   yunlin: ["yunlin", "雲林", "雲林縣"],
   chiayi: ["chiayi", "嘉義", "嘉義市"],
   chiayi_county: ["chiayi county", "嘉義縣"],
-
   pingtung: ["pingtung", "屏東", "屏東縣"],
   taitung: ["taitung", "台東", "臺東", "台東縣", "臺東縣"],
   hualien: ["hualien", "花蓮", "花蓮縣"],
   yilan: ["yilan", "宜蘭", "宜蘭縣"],
-
   penghu: ["penghu", "澎湖", "澎湖縣"],
   kinmen: ["kinmen", "金門", "金門縣"],
   lienchiang: ["lienchiang", "連江", "連江縣", "馬祖", "matsu"],
 };
 
-// 城市 filter（還是以「各大主要城市」為主）
 export const CITIES = [
   "all",
   "taipei",
