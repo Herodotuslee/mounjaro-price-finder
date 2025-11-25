@@ -45,7 +45,36 @@ function App() {
             </li>
           </ul>
 
-          {/* ⭐ Buy Me a Coffee 按鈕（右上角小咖啡 icon） */}
+          {/* ⭐ LINE icon (使用 public/icons8-line-me.svg) */}
+          <a
+            href="https://line.me/ti/g2/14wNaS4K1nmA7ytMa8pgzTLuslICubxDFVdjuQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginLeft: "16px",
+              display: "flex",
+              alignItems: "center",
+              textDecoration: "none",
+              color: "#10b981",
+              fontWeight: 500,
+              fontSize: "14px",
+              transition: "opacity 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <img
+              src="/icons8-line-me.svg"
+              alt="LINE"
+              style={{
+                width: "22px",
+                height: "22px",
+                marginRight: "6px",
+              }}
+            />
+            加入 LINE 群組
+          </a>
+          {/* ⭐ Buy Me a Coffee icon */}
           <a
             href="https://buymeacoffee.com/holaalbertc"
             target="_blank"
