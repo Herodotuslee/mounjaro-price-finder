@@ -3,7 +3,7 @@ import { Routes, Route, NavLink } from "react-router-dom";
 import PricePage from "./pages/PricePage";
 import FaqPage from "./pages/FaqPage";
 import HealthPage from "./pages/HealthPage";
-import "./styles/navbar.css"; // <-- 新增這一行
+import "./styles/navbar.css";
 
 function App() {
   return (
@@ -26,16 +26,6 @@ function App() {
             <li>
               <NavLink to="/health" className="nav-item">
                 減肥相關的健康與營養知識
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/health" className="nav-item">
-                點我買LLY發大財
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/health" className="nav-item">
-                日行一善幫幫失學少女Albert
               </NavLink>
             </li>
           </ul>
