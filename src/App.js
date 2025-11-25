@@ -26,6 +26,7 @@ function App() {
           >
             全國猛健樂資訊網
           </NavLink>
+
           <ul className="nav-links">
             <li>
               <NavLink to="/" end className="nav-item">
@@ -42,12 +43,26 @@ function App() {
                 減肥相關的健康與營養知識
               </NavLink>
             </li>
-            {/* <li>
-              <NavLink to="/report" className="nav-item">
-                回報價格 / 新增診所資訊
-              </NavLink>
-            </li> */}
           </ul>
+
+          {/* ⭐ Buy Me a Coffee 按鈕（右上角小咖啡 icon） */}
+          <a
+            href="https://buymeacoffee.com/holaalbertc"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginLeft: "16px",
+              fontSize: "20px",
+              textDecoration: "none",
+              cursor: "pointer",
+              color: "#6b7280",
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.target.style.color = "#f59e0b")}
+            onMouseLeave={(e) => (e.target.style.color = "#6b7280")}
+          >
+            ☕
+          </a>
         </div>
       </nav>
 
