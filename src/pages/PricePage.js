@@ -12,6 +12,118 @@ import {
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 
+// ---------- Helper functions (搬到 component 外面，避免 useMemo dependency 問題) ----------
+
+// Utility: avoid issues from casing / whitespace differences
+const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
+
+// 城市：selectedCity vs row.city（支援台北 / taipei / 臺北）
+const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
+  if (selectedCityValue === "all") return true;
+
+  const nRow = normalize(rowCityRaw);
+  const nSelected = normalize(selectedCityValue);
+
+  // 完全相同（row.city 已經是 taipei 等）
+  if (nRow === nSelected) return true;
+
+  const keywordsForSelected = CITY_KEYWORDS[selectedCityValue] || [];
+  const normalizedKeywords = keywordsForSelected.map(normalize);
+
+  return normalizedKeywords.includes(nRow);
+};
+
+// 類型：selectedType vs row.type（支援 診所/clinic/c、醫院/hospital/h、藥局/pharmacy/p）
+const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
+  if (selectedTypeValue === "all") return true;
+
+  // 空 type 視為診所
+  const nRow = normalize(rowTypeRaw || "clinic");
+  const nSelected = normalize(selectedTypeValue);
+
+  if (nRow === nSelected) return true;
+
+  const keywordsForSelected = TYPE_KEYWORDS[selectedTypeValue] || [];
+  const normalizedKeywords = keywordsForSelected.map(normalize);
+
+  return normalizedKeywords.includes(nRow);
+};
+
+// Build keyword variants so that Chinese and English both work（搜尋欄用）
+const buildKeywordVariants = (kwRaw) => {
+  const kw = normalize(kwRaw);
+  if (!kw) return [];
+
+  const variants = new Set([kw]);
+
+  // 🔹 城市中英對應
+  Object.entries(CITY_KEYWORDS).forEach(([cityCode, keywords]) => {
+    const normalizedKeywords = keywords.map(normalize);
+    if (normalizedKeywords.includes(kw)) {
+      normalizedKeywords.forEach((k) => variants.add(k));
+      variants.add(normalize(cityCode));
+    }
+  });
+
+  // 🔹 類型中英對應
+  Object.entries(TYPE_KEYWORDS).forEach(([typeCode, keywords]) => {
+    const normalizedKeywords = keywords.map(normalize);
+    if (normalizedKeywords.includes(kw)) {
+      normalizedKeywords.forEach((k) => variants.add(k));
+      variants.add(normalize(typeCode));
+    }
+  });
+
+  return Array.from(variants);
+};
+
+// Check if a row matches the current keyword (Chinese and English aware)
+const matchesKeyword = (row, kwRaw) => {
+  const variants = buildKeywordVariants(kwRaw);
+  if (variants.length === 0) return true; // 沒輸入關鍵字就當作有 match
+
+  const rowTypeRaw = normalize(row.type);
+  const effectiveType = rowTypeRaw || "clinic";
+
+  const cityCode = row.city || "";
+  const cityLabel = CITY_LABELS[cityCode] || "";
+  const typeLabel = TYPE_LABELS[effectiveType] || "";
+
+  const fields = [
+    row.clinic,
+    row.district,
+    cityCode,
+    cityLabel,
+    effectiveType,
+    typeLabel,
+  ];
+
+  const normalizedFields = fields.filter(Boolean).map((v) => normalize(v));
+
+  return variants.some((kw) =>
+    normalizedFields.some((field) => field.includes(kw))
+  );
+};
+
+// Display rules: null / undefined / 0 → empty
+const formatPrice = (value) => {
+  if (value === null || value === undefined || value === 0) return "";
+  return value;
+};
+
+// 更新日期顯示（全部顯示，只要有 last_updated；沒有就空）
+const formatLastUpdated = (lastUpdatedRaw) => {
+  if (!lastUpdatedRaw) return "";
+  const d = new Date(lastUpdatedRaw);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}/${m}/${day}`;
+};
+
+// ---------- Component 本體 ----------
+
 function PricePage() {
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -20,114 +132,6 @@ function PricePage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Utility: avoid issues from casing / whitespace differences
-  const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
-
-  // 城市：selectedCity vs row.city（支援台北 / taipei / 臺北）
-  const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
-    if (selectedCityValue === "all") return true;
-
-    const nRow = normalize(rowCityRaw);
-    const nSelected = normalize(selectedCityValue);
-
-    // 完全相同（row.city 已經是 taipei 等）
-    if (nRow === nSelected) return true;
-
-    const keywordsForSelected = CITY_KEYWORDS[selectedCityValue] || [];
-    const normalizedKeywords = keywordsForSelected.map(normalize);
-
-    return normalizedKeywords.includes(nRow);
-  };
-
-  // 類型：selectedType vs row.type（支援 診所/clinic/c、醫院/hospital/h、藥局/pharmacy/p）
-  const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
-    if (selectedTypeValue === "all") return true;
-
-    // 空 type 視為診所
-    const nRow = normalize(rowTypeRaw || "clinic");
-    const nSelected = normalize(selectedTypeValue);
-
-    if (nRow === nSelected) return true;
-
-    const keywordsForSelected = TYPE_KEYWORDS[selectedTypeValue] || [];
-    const normalizedKeywords = keywordsForSelected.map(normalize);
-
-    return normalizedKeywords.includes(nRow);
-  };
-
-  // Build keyword variants so that Chinese and English both work（搜尋欄用）
-  const buildKeywordVariants = (kwRaw) => {
-    const kw = normalize(kwRaw);
-    if (!kw) return [];
-
-    const variants = new Set([kw]);
-
-    // 🔹 城市中英對應
-    Object.entries(CITY_KEYWORDS).forEach(([cityCode, keywords]) => {
-      const normalizedKeywords = keywords.map(normalize);
-      if (normalizedKeywords.includes(kw)) {
-        normalizedKeywords.forEach((k) => variants.add(k));
-        variants.add(normalize(cityCode));
-      }
-    });
-
-    // 🔹 類型中英對應
-    Object.entries(TYPE_KEYWORDS).forEach(([typeCode, keywords]) => {
-      const normalizedKeywords = keywords.map(normalize);
-      if (normalizedKeywords.includes(kw)) {
-        normalizedKeywords.forEach((k) => variants.add(k));
-        variants.add(normalize(typeCode));
-      }
-    });
-
-    return Array.from(variants);
-  };
-
-  // Check if a row matches the current keyword (Chinese and English aware)
-  const matchesKeyword = (row, kwRaw) => {
-    const variants = buildKeywordVariants(kwRaw);
-    if (variants.length === 0) return true; // 沒輸入關鍵字就當作有 match
-
-    const rowTypeRaw = normalize(row.type);
-    const effectiveType = rowTypeRaw || "clinic";
-
-    const cityCode = row.city || "";
-    const cityLabel = CITY_LABELS[cityCode] || "";
-    const typeLabel = TYPE_LABELS[effectiveType] || "";
-
-    const fields = [
-      row.clinic,
-      row.district,
-      cityCode,
-      cityLabel,
-      effectiveType,
-      typeLabel,
-    ];
-
-    const normalizedFields = fields.filter(Boolean).map((v) => normalize(v));
-
-    return variants.some((kw) =>
-      normalizedFields.some((field) => field.includes(kw))
-    );
-  };
-
-  // Display rules: null / undefined / 0 → empty
-  const formatPrice = (value) => {
-    if (value === null || value === undefined || value === 0) return "";
-    return value;
-  };
-
-  // 更新日期顯示（全部顯示，只要有 last_updated；沒有就空）
-  const formatLastUpdated = (lastUpdatedRaw) => {
-    if (!lastUpdatedRaw) return "";
-    const d = new Date(lastUpdatedRaw);
-    if (Number.isNaN(d.getTime())) return "";
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}/${m}/${day}`;
-  };
 
   // 🔹 Fetch data from Supabase
   useEffect(() => {
