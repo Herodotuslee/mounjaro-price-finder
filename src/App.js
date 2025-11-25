@@ -4,6 +4,7 @@ import PricePage from "./pages/PricePage";
 import FaqPage from "./pages/FaqPage";
 import HealthPage from "./pages/HealthPage";
 import "./styles/navbar.css";
+import ReportPriceFormPage from "./pages/ReportPriceFormPage";
 
 function App() {
   return (
@@ -41,6 +42,11 @@ function App() {
                 減肥相關的健康與營養知識
               </NavLink>
             </li>
+            {/* <li>
+              <NavLink to="/report" className="nav-item">
+                回報價格 / 新增診所資訊
+              </NavLink>
+            </li> */}
           </ul>
         </div>
       </nav>
@@ -50,6 +56,7 @@ function App() {
         <Route path="/" element={<PricePage />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/health" element={<HealthPage />} />
+        <Route path="/report" element={<ReportPriceFormPage />} />
       </Routes>
     </div>
   );

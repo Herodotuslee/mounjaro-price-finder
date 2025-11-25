@@ -1,7 +1,14 @@
 // src/pages/PricePage.js
 import React, { useEffect, useMemo, useState } from "react";
 import "../styles/PricePage.css";
-import { CITY_LABELS, TYPE_LABELS, CITIES, TYPES } from "../data/prices";
+import {
+  CITY_LABELS,
+  TYPE_LABELS,
+  CITIES,
+  TYPES,
+  CITY_KEYWORDS,
+  TYPE_KEYWORDS,
+} from "../data/prices";
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 
@@ -14,16 +21,104 @@ function PricePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 小工具：避免大小寫/空白差異
+  // Utility: avoid issues from casing / whitespace differences
   const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
 
-  // 價格顯示：null / undefined / 0 → 顯示空白
+  // 城市：selectedCity vs row.city（支援台北 / taipei / 臺北）
+  const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
+    if (selectedCityValue === "all") return true;
+
+    const nRow = normalize(rowCityRaw);
+    const nSelected = normalize(selectedCityValue);
+
+    // 完全相同（row.city 已經是 taipei 等）
+    if (nRow === nSelected) return true;
+
+    const keywordsForSelected = CITY_KEYWORDS[selectedCityValue] || [];
+    const normalizedKeywords = keywordsForSelected.map(normalize);
+
+    return normalizedKeywords.includes(nRow);
+  };
+
+  // 類型：selectedType vs row.type（支援 診所/clinic/c、醫院/hospital/h、藥局/pharmacy/p）
+  const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
+    if (selectedTypeValue === "all") return true;
+
+    // 空 type 視為診所
+    const nRow = normalize(rowTypeRaw || "clinic");
+    const nSelected = normalize(selectedTypeValue);
+
+    if (nRow === nSelected) return true;
+
+    const keywordsForSelected = TYPE_KEYWORDS[selectedTypeValue] || [];
+    const normalizedKeywords = keywordsForSelected.map(normalize);
+
+    return normalizedKeywords.includes(nRow);
+  };
+
+  // Build keyword variants so that Chinese and English both work（搜尋欄用）
+  const buildKeywordVariants = (kwRaw) => {
+    const kw = normalize(kwRaw);
+    if (!kw) return [];
+
+    const variants = new Set([kw]);
+
+    // 🔹 城市中英對應
+    Object.entries(CITY_KEYWORDS).forEach(([cityCode, keywords]) => {
+      const normalizedKeywords = keywords.map(normalize);
+      if (normalizedKeywords.includes(kw)) {
+        normalizedKeywords.forEach((k) => variants.add(k));
+        variants.add(normalize(cityCode));
+      }
+    });
+
+    // 🔹 類型中英對應
+    Object.entries(TYPE_KEYWORDS).forEach(([typeCode, keywords]) => {
+      const normalizedKeywords = keywords.map(normalize);
+      if (normalizedKeywords.includes(kw)) {
+        normalizedKeywords.forEach((k) => variants.add(k));
+        variants.add(normalize(typeCode));
+      }
+    });
+
+    return Array.from(variants);
+  };
+
+  // Check if a row matches the current keyword (Chinese and English aware)
+  const matchesKeyword = (row, kwRaw) => {
+    const variants = buildKeywordVariants(kwRaw);
+    if (variants.length === 0) return true; // 沒輸入關鍵字就當作有 match
+
+    const rowTypeRaw = normalize(row.type);
+    const effectiveType = rowTypeRaw || "clinic";
+
+    const cityCode = row.city || "";
+    const cityLabel = CITY_LABELS[cityCode] || "";
+    const typeLabel = TYPE_LABELS[effectiveType] || "";
+
+    const fields = [
+      row.clinic,
+      row.district,
+      cityCode,
+      cityLabel,
+      effectiveType,
+      typeLabel,
+    ];
+
+    const normalizedFields = fields.filter(Boolean).map((v) => normalize(v));
+
+    return variants.some((kw) =>
+      normalizedFields.some((field) => field.includes(kw))
+    );
+  };
+
+  // Display rules: null / undefined / 0 → empty
   const formatPrice = (value) => {
     if (value === null || value === undefined || value === 0) return "";
     return value;
   };
 
-  // 🔹 從 Supabase 拉資料
+  // 🔹 Fetch data from Supabase
   useEffect(() => {
     async function fetchData() {
       try {
@@ -58,49 +153,27 @@ function PricePage() {
     fetchData();
   }, []);
 
-  // 🔍 只顯示「有資料」的城市（永遠保留 all）
+  // 🔍 Only show cities that actually contain data (always keep "all")
   const cityOptions = useMemo(() => {
     if (!rows || rows.length === 0) {
       return CITIES;
     }
 
     const hasData = new Set(
-      rows.map((r) => r.city).filter(Boolean) // 去掉 null / undefined / 空字串
+      rows.map((r) => r.city).filter(Boolean) // Remove null / undefined / empty string
     );
 
     return CITIES.filter((c) => c === "all" || hasData.has(c));
   }, [rows]);
 
-  // 🔍 Filter 資料（type 空白視為 clinic）
+  // 🔍 Filtering logic
   const filteredData = useMemo(() => {
-    const nSelectedCity = normalize(selectedCity);
-    const nSelectedType = normalize(selectedType);
-
     const result = rows.filter((row) => {
-      const rowCity = normalize(row.city);
+      const rowTypeRaw = row.type;
 
-      // type 空白 → 預設 clinic
-      const rowTypeRaw = normalize(row.type);
-      const effectiveType = rowTypeRaw || "clinic";
-
-      const cityOk = nSelectedCity === "all" || rowCity === nSelectedCity;
-
-      let typeOk = true;
-      if (nSelectedType !== "all") {
-        if (nSelectedType === "clinic") {
-          // 點「診所」時：包含 type 是空白 + "clinic"
-          typeOk = effectiveType === "clinic";
-        } else {
-          // 其他類型（hospital / pharmacy）必須真的有標 type
-          typeOk = rowTypeRaw === nSelectedType;
-        }
-      }
-
-      const kw = keyword.trim();
-      const kwOk =
-        kw === "" ||
-        (row.clinic && row.clinic.includes(kw)) ||
-        (row.district && row.district.includes(kw));
+      const cityOk = cityMatchesSelected(row.city, selectedCity);
+      const typeOk = typeMatchesSelected(rowTypeRaw, selectedType);
+      const kwOk = matchesKeyword(row, keyword);
 
       return cityOk && typeOk && kwOk;
     });
@@ -125,7 +198,7 @@ function PricePage() {
           全台猛健樂價格整理（5mg / 10mg）
         </h1>
 
-        {/* 🔶 免責聲明 */}
+        {/* 🔶 Disclaimer */}
         <div
           style={{
             marginTop: "8px",
@@ -157,7 +230,7 @@ function PricePage() {
           </p>
         )}
 
-        {/* 城市 filter（只顯示有資料的城市） */}
+        {/* City filter (only cities with data) */}
         <div
           style={{
             marginBottom: "12px",
@@ -177,7 +250,7 @@ function PricePage() {
           ))}
         </div>
 
-        {/* 類型 filter */}
+        {/* Type filter */}
         <div
           style={{
             marginBottom: "12px",
@@ -197,9 +270,27 @@ function PricePage() {
           ))}
         </div>
 
-        {/* 搜尋 */}
+        {/* ⭐ Pharmacy warning displayed only when pharmacy is selected */}
+        {selectedType === "pharmacy" && (
+          <div
+            style={{
+              marginBottom: "16px",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              background: "#fee2e2",
+              color: "#991b1b",
+              fontSize: "14px",
+              lineHeight: 1.7,
+              fontWeight: 600,
+            }}
+          >
+            {texts.pharmacyWarning}
+          </div>
+        )}
+
+        {/* Search bar */}
         <input
-          placeholder="搜尋診所 / 地區"
+          placeholder="搜尋診所 / 地區 / 城市 / 類型"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           style={{
@@ -210,7 +301,7 @@ function PricePage() {
           }}
         />
 
-        {/* 表格 */}
+        {/* Table */}
         <div className="table-container">
           <table>
             <thead>
@@ -226,8 +317,7 @@ function PricePage() {
             </thead>
             <tbody>
               {filteredData.map((item, index) => {
-                const rowTypeRaw = normalize(item.type);
-                const effectiveType = rowTypeRaw || "clinic"; // 顯示時沒填也當診所
+                const effectiveType = normalize(item.type) || "clinic";
 
                 return (
                   <tr key={`${item.id}-${index}`}>
