@@ -3,8 +3,9 @@ import { Routes, Route, NavLink } from "react-router-dom";
 import PricePage from "./pages/PricePage";
 import FaqPage from "./pages/FaqPage";
 import HealthPage from "./pages/HealthPage";
-import "./styles/navbar.css";
 import ReportPriceFormPage from "./pages/ReportPriceFormPage";
+import AdvancedPage from "./pages/AdvancedPage"; // 🆕 新增這行
+import "./styles/navbar.css";
 
 function App() {
   return (
@@ -41,6 +42,12 @@ function App() {
             <li>
               <NavLink to="/health" className="nav-item">
                 健康知識
+              </NavLink>
+            </li>
+            <li>
+              {/* 🆕 新增進階知識入口 */}
+              <NavLink to="/advanced" className="nav-item">
+                進階知識
               </NavLink>
             </li>
           </ul>
@@ -81,6 +88,7 @@ function App() {
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/report" element={<ReportPriceFormPage />} />
+        <Route path="/advanced" element={<AdvancedPage />} /> {/* 🆕 新增 */}
       </Routes>
     </div>
   );
