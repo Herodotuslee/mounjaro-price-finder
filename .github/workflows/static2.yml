@@ -3,4 +3,14 @@ name: CI Test
 on:
   push:
     branches:
-      - feat/test/gha # 或 '**' 這樣全部 branch 都觸發
+      - feat/test/gha # 只在這個 branch push 時觸發
+
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Say hi
+        run: echo "Hello from feature branch CI"
