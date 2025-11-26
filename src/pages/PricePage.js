@@ -14,7 +14,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 
 // ---------- Helper functions (搬到 component 外面，避免 useMemo dependency 問題) ----------
 
-// Utility: avoid issues from casing / whitespace differences
+// 小工具：避免大小寫/空白差異
 const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
 
 // 城市：selectedCity vs row.city（支援台北 / taipei / 臺北）
@@ -47,6 +47,26 @@ const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
   const normalizedKeywords = keywordsForSelected.map(normalize);
 
   return normalizedKeywords.includes(nRow);
+};
+
+// 把 DB 裡的 raw type（診所 / c / clinic / 藥局 / p ...）統一轉成標準代碼
+// 標準代碼預期是：clinic / hospital / pharmacy
+const getCanonicalTypeCode = (rowTypeRaw) => {
+  const n = normalize(rowTypeRaw || "clinic");
+
+  // 1) 已經是標準代碼（TYPE_LABELS 有這個 key）
+  if (TYPE_LABELS[n]) return n;
+
+  // 2) 用 TYPE_KEYWORDS 反查，例如 "藥局"、"p"、"pharma" → "pharmacy"
+  for (const [typeCode, keywords] of Object.entries(TYPE_KEYWORDS)) {
+    const normalizedKeywords = keywords.map(normalize);
+    if (normalizedKeywords.includes(n)) {
+      return typeCode; // e.g. "pharmacy"
+    }
+  }
+
+  // 3) 實在看不懂就當診所
+  return "clinic";
 };
 
 // Build keyword variants so that Chinese and English both work（搜尋欄用）
@@ -82,19 +102,17 @@ const matchesKeyword = (row, kwRaw) => {
   const variants = buildKeywordVariants(kwRaw);
   if (variants.length === 0) return true; // 沒輸入關鍵字就當作有 match
 
-  const rowTypeRaw = normalize(row.type);
-  const effectiveType = rowTypeRaw || "clinic";
-
+  const typeCode = getCanonicalTypeCode(row.type);
   const cityCode = row.city || "";
   const cityLabel = CITY_LABELS[cityCode] || "";
-  const typeLabel = TYPE_LABELS[effectiveType] || "";
+  const typeLabel = TYPE_LABELS[typeCode] || "";
 
   const fields = [
     row.clinic,
     row.district,
     cityCode,
     cityLabel,
-    effectiveType,
+    typeCode,
     typeLabel,
   ];
 
@@ -105,7 +123,7 @@ const matchesKeyword = (row, kwRaw) => {
   );
 };
 
-// Display rules: null / undefined / 0 → empty
+// 價格顯示：null / undefined / 0 → 顯示空白
 const formatPrice = (value) => {
   if (value === null || value === undefined || value === 0) return "";
   return value;
@@ -333,7 +351,7 @@ function PricePage() {
             </thead>
             <tbody>
               {filteredData.map((item, index) => {
-                const effectiveType = normalize(item.type) || "clinic";
+                const typeCode = getCanonicalTypeCode(item.type);
                 const lastUpdatedText = formatLastUpdated(item.last_updated);
 
                 return (
@@ -342,7 +360,7 @@ function PricePage() {
                       {CITY_LABELS[item.city] || item.city || "-"}
                     </td>
                     <td>{item.district || "-"}</td>
-                    <td>{TYPE_LABELS[effectiveType] || "診所"}</td>
+                    <td>{TYPE_LABELS[typeCode] || "診所"}</td>
                     <td>{item.clinic}</td>
                     <td>{formatPrice(item.price5mg)}</td>
                     <td>{formatPrice(item.price10mg)}</td>
