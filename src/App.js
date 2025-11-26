@@ -6,6 +6,7 @@ import HealthPage from "./pages/HealthPage";
 import ReportPriceFormPage from "./pages/ReportPriceFormPage";
 import AdvancedPage from "./pages/AdvancedPage"; // 🆕 新增這行
 import "./styles/navbar.css";
+import LazyPage from "./pages/LazyPage";
 
 function App() {
   return (
@@ -32,6 +33,11 @@ function App() {
             <li>
               <NavLink to="/" end className="nav-item">
                 價格資訊
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/lazy" className="nav-item">
+                懶人包
               </NavLink>
             </li>
             <li>
@@ -86,6 +92,7 @@ function App() {
       <Routes>
         <Route path="/" element={<PricePage />} />
         <Route path="/faq" element={<FaqPage />} />
+        <Route path="/lazy" element={<LazyPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/report" element={<ReportPriceFormPage />} />
         <Route path="/advanced" element={<AdvancedPage />} /> {/* 🆕 新增 */}
