@@ -321,6 +321,23 @@ function PricePage() {
           </div>
         )}
 
+        {selectedType === "hospital" && (
+          <div
+            style={{
+              marginBottom: "16px",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              background: "#fee2e2",
+              color: "#991b1b",
+              fontSize: "14px",
+              lineHeight: 1.7,
+              fontWeight: 600,
+            }}
+          >
+            {texts.hospitalWarning}
+          </div>
+        )}
+
         {/* Search bar */}
         <input
           placeholder="搜尋診所 / 地區 / 城市 / 類型"
