@@ -75,14 +75,17 @@ function App() {
               加入LINE群組
             </a>
 
-            {/* Buy Me a Coffee icon */}
             <a
               href="https://buymeacoffee.com/holaalbertc"
               target="_blank"
               rel="noopener noreferrer"
               className="nav-coffee-link"
             >
-              ☕
+              <img
+                src="/image/bmc-logo.png"
+                alt="Buy me a coffee"
+                style={{ height: "30px", objectFit: "contain" }}
+              />
             </a>
           </div>
         </div>
