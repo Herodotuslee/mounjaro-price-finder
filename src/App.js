@@ -56,6 +56,12 @@ function App() {
                 進階知識
               </NavLink>
             </li>
+            <li>
+              {/* 🆕 新增進階知識入口 */}
+              <NavLink to="/report" className="nav-item">
+                回報價格
+              </NavLink>
+            </li>
           </ul>
 
           {/* ⭐ 右側 icon 區塊 */}

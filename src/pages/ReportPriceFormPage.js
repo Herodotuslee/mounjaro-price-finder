@@ -17,14 +17,13 @@ const INITIAL_FORM = {
   note: "",
 };
 
-// 城市選項：用 CITY_LABELS 為主（顯示中文）
 const CITY_OPTIONS = ["", ...Object.values(CITY_LABELS)];
 
 const TYPE_OPTIONS = [
   { value: "clinic", label: "診所" },
   { value: "hospital", label: "醫院" },
   { value: "pharmacy", label: "藥局" },
-  { value: "medical_aesthetic", label: "醫美診所" }, // 醫美
+  { value: "medical_aesthetic", label: "醫美" },
 ];
 
 function ReportPriceFormPage() {
@@ -88,14 +87,19 @@ function ReportPriceFormPage() {
       price12_5mg: toNumberOrNull(form.price12_5mg),
       price15mg: toNumberOrNull(form.price15mg),
       note: form.note.trim() || null,
-      last_updated: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
       address: null,
+
+      // 放在回報表裡的狀態，預設 pending
+      status: "pending",
+
+      // 這筆價格是使用者看到的「最後更新日期」
+      last_updated: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
     };
 
     try {
       setSubmitting(true);
 
-      const url = `${SUPABASE_URL}/rest/v1/mounjaro_data`;
+      const url = `${SUPABASE_URL}/rest/v1/mounjaro_reports`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -115,7 +119,7 @@ function ReportPriceFormPage() {
       setForm(INITIAL_FORM);
       setMessage({
         type: "success",
-        text: "感謝回報！資料已送出，可能需要一段時間人工審核後才會顯示在主表格中。",
+        text: "感謝回報！資料已送出，會先進入回報列表，站長人工審核後才會更新到主表格。",
       });
     } catch (err) {
       console.error("送出回報失敗：", err);
@@ -139,7 +143,7 @@ function ReportPriceFormPage() {
             color: "#0f172a",
           }}
         >
-          猛健樂價格回報表單
+          回報表單
         </h1>
 
         {/* 標語 */}
@@ -150,7 +154,7 @@ function ReportPriceFormPage() {
             color: "#64748b",
           }}
         >
-          希望健康的體態是每個人的權利，無論富貴。
+          希望健康的體態是每個台灣人的權利。
         </p>
 
         {/* 說明文字 */}
@@ -166,7 +170,7 @@ function ReportPriceFormPage() {
           }}
         >
           <p style={{ marginBottom: "8px" }}>
-            感謝你願意協助回報猛健樂價格促進善的循環，這個網站是靠大家一起維護的民間資訊整理。
+            感謝你願意協助回報猛健樂價格促進善的循環，這個網站是靠大家一起維護的民間資訊整理。價格並非唯一因素，如果有推薦好醫師也歡迎告知！
           </p>
           <ul style={{ paddingLeft: "18px", marginBottom: "8px" }}>
             <li>目前主表格主要顯示 5 mg / 10 mg 價格。</li>
@@ -175,17 +179,13 @@ function ReportPriceFormPage() {
               等其他劑量，也會一併收入資料庫中，之後會再慢慢設計網頁呈現。
             </li>
             <li>
-              回報的資料<strong>不一定會馬上顯示</strong>
-              在主表格中，站長會先做基本人工審核（排除重複、錯字、明顯異常價格）。
+              回報的資料<strong>不會直接顯示</strong>
+              在主表格中，會先進入回報列表，由站長人工審核（排除重複、錯字、明顯異常價格）後再更新。
             </li>
             <li>
               如果你覺得某位醫師特別細心、溝通良好，也非常歡迎在「備註」欄位簡單寫下推薦與看診經驗，幫助更多人找到好醫師。
             </li>
           </ul>
-          <p style={{ fontSize: "13px", color: "#475569" }}>
-            若價格是聽朋友說或不太確定，也可以在備註中簡單說明來源（例如：Dcard
-            分享、FB 社團截圖等）。
-          </p>
         </div>
 
         {/* 訊息 */}
@@ -330,7 +330,7 @@ function ReportPriceFormPage() {
             </select>
           </div>
 
-          {/* 價格區塊：文字輸入數字（改版：欄位放寬、可自動換行） */}
+          {/* 價格區塊 */}
           <div
             style={{
               marginBottom: "16px",
@@ -342,168 +342,54 @@ function ReportPriceFormPage() {
           >
             <div
               style={{
-                marginBottom: "4px",
+                marginBottom: "8px",
                 fontWeight: 600,
                 color: "#0f172a",
               }}
             >
-              價格（至少填一格，單位：新台幣）
+              價格（至少填一格）
             </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                marginBottom: "8px",
-              }}
-            >
-              價格請輸入整數即可，例如
-              14500。手機版畫面會自動換行，不用勉強塞在同一列。
-            </div>
+
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                gap: "10px",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: "16px 20px",
               }}
             >
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    marginBottom: "2px",
-                    display: "block",
-                  }}
-                >
-                  2.5 mg
-                </label>
-                <input
-                  type="text"
-                  value={form.price2_5mg}
-                  onChange={handleChange("price2_5mg")}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    fontSize: "13px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                  }}
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    marginBottom: "2px",
-                    display: "block",
-                  }}
-                >
-                  5 mg
-                </label>
-                <input
-                  type="text"
-                  value={form.price5mg}
-                  onChange={handleChange("price5mg")}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    fontSize: "13px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                  }}
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    marginBottom: "2px",
-                    display: "block",
-                  }}
-                >
-                  7.5 mg
-                </label>
-                <input
-                  type="text"
-                  value={form.price7_5mg}
-                  onChange={handleChange("price7_5mg")}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    fontSize: "13px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                  }}
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    marginBottom: "2px",
-                    display: "block",
-                  }}
-                >
-                  10 mg
-                </label>
-                <input
-                  type="text"
-                  value={form.price10mg}
-                  onChange={handleChange("price10mg")}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    fontSize: "13px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                  }}
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    marginBottom: "2px",
-                    display: "block",
-                  }}
-                >
-                  12.5 mg
-                </label>
-                <input
-                  type="text"
-                  value={form.price12_5mg}
-                  onChange={handleChange("price12_5mg")}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    fontSize: "13px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                  }}
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    marginBottom: "2px",
-                    display: "block",
-                  }}
-                >
-                  15 mg
-                </label>
-                <input
-                  type="text"
-                  value={form.price15mg}
-                  onChange={handleChange("price15mg")}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    fontSize: "13px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                  }}
-                />
-              </div>
+              {[
+                ["price2_5mg", "2.5 mg"],
+                ["price5mg", "5 mg"],
+                ["price7_5mg", "7.5 mg"],
+                ["price10mg", "10 mg"],
+                ["price12_5mg", "12.5 mg"],
+                ["price15mg", "15 mg"],
+              ].map(([field, label]) => (
+                <div key={field}>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      marginBottom: "4px",
+                      display: "block",
+                    }}
+                  >
+                    {label}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={form[field]}
+                    onChange={handleChange(field)}
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: "13px",
+                      borderRadius: "8px",
+                      border: "1px solid #e5e7eb",
+                    }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -533,7 +419,6 @@ function ReportPriceFormPage() {
               }}
             />
           </div>
-
           <button
             type="submit"
             disabled={submitting}
@@ -541,12 +426,26 @@ function ReportPriceFormPage() {
               width: "100%",
               padding: "10px",
               borderRadius: "999px",
-              border: "none",
+              border: submitting ? "1px solid #9ca3af" : "1px solid #0d5f59",
               fontSize: "15px",
               fontWeight: 600,
               cursor: submitting ? "default" : "pointer",
-              background: submitting ? "#9ca3af" : "#2563eb",
+              background: submitting ? "#9ca3af" : "#0f766e",
               color: "#ffffff",
+              transition: "all 0.15s ease",
+              transform: submitting ? "scale(1)" : "scale(1)",
+            }}
+            onMouseEnter={(e) => {
+              if (!submitting) {
+                e.currentTarget.style.background = "#0d5f59";
+                e.currentTarget.style.transform = "scale(1.015)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!submitting) {
+                e.currentTarget.style.background = "#0f766e";
+                e.currentTarget.style.transform = "scale(1)";
+              }
             }}
           >
             {submitting ? "送出中…" : "送出回報"}
@@ -556,12 +455,12 @@ function ReportPriceFormPage() {
             style={{
               marginTop: "8px",
               fontSize: "12px",
-              color: "#6b7280",
+              color: "#0f766e",
               textAlign: "center",
               lineHeight: 1.5,
             }}
           >
-            資料送出後不一定會立即顯示在主表格中，站長會不定期人工檢查、去除重複與異常資料後再更新。
+            資料送出後不會直接更新主表格，會先進入回報列表，由站長不定期人工檢查、去除重複與異常資料後再更新。
           </p>
         </form>
       </div>
