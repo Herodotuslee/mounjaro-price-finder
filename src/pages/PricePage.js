@@ -4,7 +4,6 @@ import "../styles/PricePage.css";
 import {
   CITY_LABELS,
   TYPE_LABELS,
-  CITIES,
   TYPES,
   CITY_KEYWORDS,
   TYPE_KEYWORDS,
@@ -24,7 +23,7 @@ const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
   const nRow = normalize(rowCityRaw);
   const nSelected = normalize(selectedCityValue);
 
-  // 完全相同（row.city 已經是 taipei 等）
+  // 完全相同（row.city 已經是「台北」或「taipei」等）
   if (nRow === nSelected) return true;
 
   const keywordsForSelected = CITY_KEYWORDS[selectedCityValue] || [];
@@ -57,7 +56,7 @@ const getCanonicalTypeCode = (rowTypeRaw) => {
   // 1) 已經是標準代碼（TYPE_LABELS 有這個 key）
   if (TYPE_LABELS[n]) return n;
 
-  // 2) 用 TYPE_KEYWORDS 反查，例如 "藥局"、"p"、"pharma" → "pharmacy"
+  // 2) 用 TYPE_KEYWORDS 反查，例如 "藥局"、"p" → "pharmacy"
   for (const [typeCode, keywords] of Object.entries(TYPE_KEYWORDS)) {
     const normalizedKeywords = keywords.map(normalize);
     if (normalizedKeywords.includes(n)) {
@@ -186,17 +185,12 @@ function PricePage() {
     fetchData();
   }, []);
 
-  // 🔍 Only show cities that actually contain data (always keep "all")
+  // 🔍 只顯示真的有資料的城市（用資料庫裡的中文 city）
   const cityOptions = useMemo(() => {
-    if (!rows || rows.length === 0) {
-      return CITIES;
-    }
-
-    const hasData = new Set(
-      rows.map((r) => r.city).filter(Boolean) // Remove null / undefined / empty string
+    const uniqueCities = Array.from(
+      new Set(rows.map((r) => r.city).filter(Boolean)) // e.g. "台北", "新北"
     );
-
-    return CITIES.filter((c) => c === "all" || hasData.has(c));
+    return ["all", ...uniqueCities];
   }, [rows]);
 
   // 🔍 Filtering logic
@@ -263,7 +257,7 @@ function PricePage() {
           </p>
         )}
 
-        {/* City filter (only cities with data) */}
+        {/* City filter（按鈕文字用中文，且只顯示有資料的城市） */}
         <div
           style={{
             marginBottom: "12px",
@@ -278,7 +272,7 @@ function PricePage() {
               onClick={() => setSelectedCity(c)}
               className={`filter-btn ${c === selectedCity ? "active" : ""}`}
             >
-              {c === "all" ? "全部城市" : CITY_LABELS[c]}
+              {c === "all" ? "全部城市" : c}
             </button>
           ))}
         </div>
@@ -321,6 +315,7 @@ function PricePage() {
           </div>
         )}
 
+        {/* ⭐ Hospital warning */}
         {selectedType === "hospital" && (
           <div
             style={{
@@ -386,7 +381,7 @@ function PricePage() {
                         <span
                           style={{
                             fontSize: "12px",
-                            color: "#9ca3af", // 淡灰色，不會太顯眼
+                            color: "#9ca3af",
                           }}
                         >
                           {lastUpdatedText}

@@ -26,14 +26,24 @@ export const TYPE_LABELS = {
   clinic: "診所",
   hospital: "醫院",
   pharmacy: "藥局",
+  medical_aesthetic: "醫美",
 };
 
 export const TYPE_KEYWORDS = {
   clinic: ["clinic", "診所", "c"],
   hospital: ["hospital", "醫院", "h"],
   pharmacy: ["pharmacy", "藥局", "藥房", "p"],
+  medical_aesthetic: ["醫美", "醫美診所", "aesthetic", "aesthetic clinic", "a"],
   all: ["all", "全部"],
 };
+
+export const TYPES = [
+  "all",
+  "clinic",
+  "hospital",
+  "pharmacy",
+  "medical_aesthetic",
+];
 
 export const CITY_KEYWORDS = {
   all: ["all", "全部"],
@@ -72,29 +82,26 @@ export const CITY_KEYWORDS = {
 
 export const CITIES = [
   "all",
-  "taipei",
-  "new_taipei",
-  "taoyuan",
-  "taichung",
-  "tainan",
-  "kaohsiung",
-  "keelung",
-  "hsinchu",
-  "hsinchu_county",
-  "miaoli",
-  "changhua",
-  "nantou",
-  "yunlin",
-  "chiayi",
-  "chiayi_county",
-  "pingtung",
-  "taitung",
-  "hualien",
-  "yilan",
-  "penghu",
-  "kinmen",
-  "lienchiang",
+  "台北",
+  "新北",
+  "桃園",
+  "台中",
+  "台南",
+  "高雄",
+  "基隆",
+  "新竹",
+  "新竹縣",
+  "苗栗",
+  "彰化",
+  "南投",
+  "雲林",
+  "嘉義",
+  "嘉義縣",
+  "屏東",
+  "台東",
+  "花蓮",
+  "宜蘭",
+  "澎湖",
+  "金門",
+  "連江",
 ];
-
-// 類型 filter
-export const TYPES = ["all", "clinic", "hospital", "pharmacy"];
