@@ -98,7 +98,7 @@ function App() {
         <Route path="/lazy" element={<LazyPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/report" element={<ReportPriceFormPage />} />
-        <Route path="/advanced" element={<AdvancedPage />} /> {/* 🆕 新增 */}
+        <Route path="/advanced" element={<AdvancedPage />} />
       </Routes>
     </div>
   );
