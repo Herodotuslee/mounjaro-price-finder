@@ -78,8 +78,6 @@ function ReportPriceFormPage() {
       district: form.district.trim() || null,
       clinic: form.clinic.trim(),
       type: form.type || null,
-      // 是否為醫美：用類型自動判斷
-      is_cosmetic: form.type === "medical_aesthetic",
       price2_5mg: toNumberOrNull(form.price2_5mg),
       price5mg: toNumberOrNull(form.price5mg),
       price7_5mg: toNumberOrNull(form.price7_5mg),
