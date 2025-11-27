@@ -56,6 +56,12 @@ function App() {
                 進階知識
               </NavLink>
             </li>
+            <li>
+              {/* 🆕 新增進階知識入口 */}
+              <NavLink to="/report" className="nav-item">
+                回報價格
+              </NavLink>
+            </li>
           </ul>
 
           {/* ⭐ 右側 icon 區塊 */}
@@ -98,7 +104,7 @@ function App() {
         <Route path="/lazy" element={<LazyPage />} />
         <Route path="/health" element={<HealthPage />} />
         <Route path="/report" element={<ReportPriceFormPage />} />
-        <Route path="/advanced" element={<AdvancedPage />} /> {/* 🆕 新增 */}
+        <Route path="/advanced" element={<AdvancedPage />} />
       </Routes>
     </div>
   );

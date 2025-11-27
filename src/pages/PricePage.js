@@ -357,8 +357,8 @@ function PricePage() {
                 <th>名稱</th>
                 <th>5 mg 價格</th>
                 <th>10 mg 價格</th>
-                <th>更新日期</th>
                 <th>備註</th>
+                <th>更新日期</th>
               </tr>
             </thead>
             <tbody>
@@ -374,8 +374,9 @@ function PricePage() {
                     <td>{item.district || "-"}</td>
                     <td>{TYPE_LABELS[typeCode] || "診所"}</td>
                     <td>{item.clinic}</td>
-                    <td>{formatPrice(item.price5mg)}</td>
-                    <td>{formatPrice(item.price10mg)}</td>
+                    <td>{formatPrice(item.price5mg) || "-"}</td>
+                    <td>{formatPrice(item.price10mg) || "-"}</td>
+                    <td className="table-note">{item.note || "-"}</td>
                     <td>
                       {lastUpdatedText && (
                         <span
@@ -388,7 +389,6 @@ function PricePage() {
                         </span>
                       )}
                     </td>
-                    <td className="table-note">{item.note || "-"}</td>
                   </tr>
                 );
               })}

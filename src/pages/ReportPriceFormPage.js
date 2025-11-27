@@ -1,87 +1,112 @@
-// src/components/ReportPriceForm.jsx
+// src/pages/ReportPriceFormPage.js
 import React, { useState } from "react";
-import { CITIES, TYPES, CITY_LABELS, TYPE_LABELS } from "../data/prices";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
+import { CITY_LABELS } from "../data/prices";
 
-// Helper: filter out "all" option for reporting
-const REPORT_CITY_OPTIONS = CITIES.filter((c) => c !== "all");
-const REPORT_TYPE_OPTIONS = TYPES.filter((t) => t !== "all");
+const INITIAL_FORM = {
+  city: "",
+  district: "",
+  clinic: "",
+  type: "clinic",
+  price2_5mg: "",
+  price5mg: "",
+  price7_5mg: "",
+  price10mg: "",
+  price12_5mg: "",
+  price15mg: "",
+  note: "",
+};
+
+const CITY_OPTIONS = ["", ...Object.values(CITY_LABELS)];
+
+const TYPE_OPTIONS = [
+  { value: "clinic", label: "診所" },
+  { value: "hospital", label: "醫院" },
+  { value: "pharmacy", label: "藥局" },
+  { value: "medical_aesthetic", label: "醫美" },
+];
 
 function ReportPriceFormPage() {
-  const [city, setCity] = useState("");
-  const [district, setDistrict] = useState("");
-  const [clinic, setClinic] = useState("");
-  const [type, setType] = useState("clinic");
-  const [price5mg, setPrice5mg] = useState("");
-  const [price10mg, setPrice10mg] = useState("");
-  const [note, setNote] = useState("");
-  const [email, setEmail] = useState("");
-
+  const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: string }
 
-  // Basic validation before submit
-  const validate = () => {
-    if (!city) return "請選擇城市";
-    if (!clinic.trim()) return "請填寫診所 / 醫院 / 藥局名稱";
+  const handleChange = (field) => (e) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: e.target.value,
+    }));
+  };
 
-    const has5 = price5mg !== "" && !Number.isNaN(Number(price5mg));
-    const has10 = price10mg !== "" && !Number.isNaN(Number(price10mg));
-
-    if (!has5 && !has10) {
-      return "請至少填寫 5mg 或 10mg 的價格其中一項";
-    }
-
-    const num5 = Number(price5mg);
-    const num10 = Number(price10mg);
-
-    // Strict price limitations (invisible to user, only used for validation)
-    if (has5 && (num5 < 1000 || num5 > 13000)) {
-      return "5mg 價格需介於 1000～13000 元之間";
-    }
-
-    if (has10 && (num10 < 1000 || num10 > 16000)) {
-      return "10mg 價格需介於 1000～16000 元之間";
-    }
-
-    return "";
+  const toNumberOrNull = (value) => {
+    const trimmed = (value ?? "").toString().trim();
+    if (trimmed === "") return null;
+    const n = Number(trimmed);
+    return Number.isNaN(n) ? null : n;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccessMsg("");
-    setErrorMsg("");
+    setMessage(null);
 
-    const err = validate();
-    if (err) {
-      setErrorMsg(err);
+    // 簡單必填檢查
+    if (!form.city || !form.clinic.trim()) {
+      setMessage({
+        type: "error",
+        text: "請至少填寫城市與診所 / 醫院 / 藥局 / 醫美診所名稱。",
+      });
       return;
     }
+
+    if (
+      !form.price2_5mg &&
+      !form.price5mg &&
+      !form.price7_5mg &&
+      !form.price10mg &&
+      !form.price12_5mg &&
+      !form.price15mg
+    ) {
+      setMessage({
+        type: "error",
+        text: "請至少填寫一個劑量的價格（2.5 / 5 / 7.5 / 10 / 12.5 / 15 mg 任一即可）。",
+      });
+      return;
+    }
+
+    const payload = {
+      city: form.city.trim(),
+      district: form.district.trim() || null,
+      clinic: form.clinic.trim(),
+      type: form.type || null,
+      // 是否為醫美：用類型自動判斷
+      is_cosmetic: form.type === "medical_aesthetic",
+      price2_5mg: toNumberOrNull(form.price2_5mg),
+      price5mg: toNumberOrNull(form.price5mg),
+      price7_5mg: toNumberOrNull(form.price7_5mg),
+      price10mg: toNumberOrNull(form.price10mg),
+      price12_5mg: toNumberOrNull(form.price12_5mg),
+      price15mg: toNumberOrNull(form.price15mg),
+      note: form.note.trim() || null,
+      address: null,
+
+      // 放在回報表裡的狀態，預設 pending
+      status: "pending",
+
+      // 這筆價格是使用者看到的「最後更新日期」
+      last_updated: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+    };
 
     try {
       setSubmitting(true);
 
-      const payload = {
-        city,
-        district: district.trim() || null,
-        clinic: clinic.trim(),
-        type,
-        price5mg: price5mg === "" ? null : Number(price5mg),
-        price10mg: price10mg === "" ? null : Number(price10mg),
-        note: note.trim() || null,
-        email: email.trim() || null,
-      };
-
-      const url = `${SUPABASE_URL}/rest/v1/price_reports`;
-
+      const url = `${SUPABASE_URL}/rest/v1/mounjaro_reports`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
           apikey: SUPABASE_ANON_KEY,
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           "Content-Type": "application/json",
-          Prefer: "return=representation",
+          Prefer: "return=minimal",
         },
         body: JSON.stringify(payload),
       });
@@ -91,20 +116,17 @@ function ReportPriceFormPage() {
         throw new Error(`HTTP ${res.status}: ${text}`);
       }
 
-      // Clear form after success
-      setCity("");
-      setDistrict("");
-      setClinic("");
-      setType("clinic");
-      setPrice5mg("");
-      setPrice10mg("");
-      setNote("");
-      setEmail("");
-
-      setSuccessMsg("感謝回報！我們會在人工審核後再更新到主表。");
+      setForm(INITIAL_FORM);
+      setMessage({
+        type: "success",
+        text: "感謝回報！資料已送出，會先進入回報列表，站長人工審核後才會更新到主表格。",
+      });
     } catch (err) {
-      console.error("❌ Failed to submit price report:", err);
-      setErrorMsg("送出失敗，請稍後再試一次，或截圖回報給版主。");
+      console.error("送出回報失敗：", err);
+      setMessage({
+        type: "error",
+        text: "送出資料時發生錯誤，請稍後再試，或聯絡站長協助。",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -112,324 +134,335 @@ function ReportPriceFormPage() {
 
   return (
     <div style={{ minHeight: "100vh", padding: "20px", background: "#f8fafc" }}>
-      <div style={{ maxWidth: "1000px", margin: "auto" }}>
+      <div style={{ maxWidth: "720px", margin: "0 auto" }}>
         <h1
           style={{
             fontSize: "24px",
             fontWeight: "bold",
             marginBottom: "6px",
+            color: "#0f172a",
           }}
         >
-          回報價格 / 新增診所資訊
+          回報表單
         </h1>
+
+        {/* 標語 */}
         <p
           style={{
+            marginBottom: "12px",
             fontSize: "13px",
-            color: "#6b7280",
-            marginBottom: "16px",
-            lineHeight: 1.6,
+            color: "#64748b",
           }}
         >
-          若你有不同的價格資訊，歡迎協助回報。所有資料會先經過人工審核，確認後才會公開顯示。
+          希望健康的體態是每個台灣人的權利。
         </p>
 
-        {/* Form container (narrower than full width) */}
+        {/* 說明文字 */}
         <div
           style={{
-            maxWidth: "600px",
-            background: "#ffffff",
-            borderRadius: "10px",
-            border: "1px solid #e5e7eb",
-            padding: "16px 16px 18px",
+            marginBottom: "16px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            background: "#e0f2fe",
+            color: "#0f172a",
+            fontSize: "14px",
+            lineHeight: 1.7,
           }}
         >
-          <form onSubmit={handleSubmit}>
-            {/* Location fields */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "14px",
-              }}
-            >
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    display: "block",
-                    marginBottom: "4px",
-                    fontWeight: 500,
-                  }}
-                >
-                  城市（必填）
-                </label>
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "14px",
-                  }}
-                >
-                  <option value="">請選擇城市</option>
-                  {REPORT_CITY_OPTIONS.map((c) => (
-                    <option key={c} value={c}>
-                      {CITY_LABELS[c]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    display: "block",
-                    marginBottom: "4px",
-                    fontWeight: 500,
-                  }}
-                >
-                  地區（選填）
-                </label>
-                <input
-                  type="text"
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  placeholder="例如：信義區 / 北區"
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "14px",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Clinic name */}
-            <div style={{ marginBottom: "14px" }}>
-              <label
-                style={{
-                  fontSize: "13px",
-                  display: "block",
-                  marginBottom: "4px",
-                  fontWeight: 500,
-                }}
-              >
-                診所 / 醫院 / 藥局名稱（必填）
-              </label>
-              <input
-                type="text"
-                value={clinic}
-                onChange={(e) => setClinic(e.target.value)}
-                placeholder="請填寫官方名稱，以方便其他人辨識"
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "14px",
-                }}
-              />
-            </div>
-
-            {/* Type buttons */}
-            <div style={{ marginBottom: "16px" }}>
-              <label
-                style={{
-                  fontSize: "13px",
-                  display: "block",
-                  marginBottom: "6px",
-                  fontWeight: 500,
-                }}
-              >
-                類型（必選）
-              </label>
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                {REPORT_TYPE_OPTIONS.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setType(t)}
-                    className={`filter-btn ${type === t ? "active" : ""}`}
-                  >
-                    {TYPE_LABELS[t]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Price fields */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "14px",
-              }}
-            >
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    display: "block",
-                    marginBottom: "4px",
-                    fontWeight: 500,
-                  }}
-                >
-                  5mg 價格（元）
-                </label>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  value={price5mg}
-                  onChange={(e) => setPrice5mg(e.target.value)}
-                  placeholder=""
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "14px",
-                  }}
-                  min={1000}
-                  max={13000}
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "13px",
-                    display: "block",
-                    marginBottom: "4px",
-                    fontWeight: 500,
-                  }}
-                >
-                  10mg 價格（元）
-                </label>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  value={price10mg}
-                  onChange={(e) => setPrice10mg(e.target.value)}
-                  placeholder=""
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "14px",
-                  }}
-                  min={1000}
-                  max={16000}
-                />
-              </div>
-            </div>
-
-            {/* Note */}
-            <div style={{ marginBottom: "14px" }}>
-              <label
-                style={{
-                  fontSize: "13px",
-                  display: "block",
-                  marginBottom: "4px",
-                  fontWeight: 500,
-                }}
-              >
-                備註（選填）
-              </label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="例如：需先看診、會推銷醫美、排隊人多、醫師很細心…"
-                rows={3}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "14px",
-                  resize: "vertical",
-                }}
-              />
-            </div>
-
-            {/* Email (optional) */}
-            <div style={{ marginBottom: "16px" }}>
-              <label
-                style={{
-                  fontSize: "13px",
-                  display: "block",
-                  marginBottom: "4px",
-                  fontWeight: 500,
-                }}
-              >
-                Email（選填）
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="如果願意，填寫 email 方便必要時聯絡你（不會公開）"
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "14px",
-                }}
-              />
-            </div>
-
-            {/* Messages */}
-            {errorMsg && (
-              <p
-                style={{
-                  color: "#b91c1c",
-                  fontSize: "13px",
-                  marginBottom: "8px",
-                  lineHeight: 1.4,
-                }}
-              >
-                {errorMsg}
-              </p>
-            )}
-            {successMsg && (
-              <p
-                style={{
-                  color: "#166534",
-                  fontSize: "13px",
-                  marginBottom: "8px",
-                  lineHeight: 1.4,
-                }}
-              >
-                {successMsg}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "999px",
-                border: "none",
-                background: submitting ? "#9ca3af" : "#4f46e5",
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: "14px",
-                cursor: submitting ? "default" : "pointer",
-              }}
-            >
-              {submitting ? "送出中…" : "送出價格回報"}
-            </button>
-          </form>
+          <p style={{ marginBottom: "8px" }}>
+            感謝你願意協助回報猛健樂價格促進善的循環，這個網站是靠大家一起維護的民間資訊整理。價格並非唯一因素，如果有推薦好醫師也歡迎告知！
+          </p>
+          <ul style={{ paddingLeft: "18px", marginBottom: "8px" }}>
+            <li>目前主表格主要顯示 5 mg / 10 mg 價格。</li>
+            <li>
+              你填寫的 2.5 / 7.5 / 12.5 / 15 mg
+              等其他劑量，也會一併收入資料庫中，之後會再慢慢設計網頁呈現。
+            </li>
+            <li>
+              回報的資料<strong>不會直接顯示</strong>
+              在主表格中，會先進入回報列表，由站長人工審核（排除重複、錯字、明顯異常價格）後再更新。
+            </li>
+            <li>
+              如果你覺得某位醫師特別細心、溝通良好，也非常歡迎在「備註」欄位簡單寫下推薦與看診經驗，幫助更多人找到好醫師。
+            </li>
+          </ul>
         </div>
+
+        {/* 訊息 */}
+        {message && (
+          <div
+            style={{
+              marginBottom: "16px",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              fontSize: "14px",
+              lineHeight: 1.6,
+              background: message.type === "success" ? "#dcfce7" : "#fee2e2",
+              color: message.type === "success" ? "#166534" : "#b91c1c",
+            }}
+          >
+            {message.text}
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            background: "#ffffff",
+            padding: "16px",
+            borderRadius: "12px",
+            boxShadow: "0 1px 3px rgba(15,23,42,0.08)",
+          }}
+        >
+          {/* 城市 */}
+          <div style={{ marginBottom: "12px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                marginBottom: "4px",
+                color: "#0f172a",
+              }}
+            >
+              城市（必填）
+            </label>
+            <select
+              value={form.city}
+              onChange={handleChange("city")}
+              style={{
+                width: "100%",
+                padding: "8px",
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+              }}
+            >
+              {CITY_OPTIONS.map((c) => (
+                <option key={c} value={c}>
+                  {c === "" ? "請選擇城市" : c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 地區 */}
+          <div style={{ marginBottom: "12px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                marginBottom: "4px",
+                color: "#0f172a",
+              }}
+            >
+              區域 / 行政區
+            </label>
+            <input
+              type="text"
+              value={form.district}
+              onChange={handleChange("district")}
+              placeholder="例如：大安、信義、新莊、楠梓…"
+              style={{
+                width: "100%",
+                padding: "8px",
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+              }}
+            />
+          </div>
+
+          {/* 診所 / 醫院 / 藥局 / 醫美診所 名稱 */}
+          <div style={{ marginBottom: "12px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                marginBottom: "4px",
+                color: "#0f172a",
+              }}
+            >
+              診所 / 醫院 / 藥局 / 醫美診所名稱（必填）
+            </label>
+            <input
+              type="text"
+              value={form.clinic}
+              onChange={handleChange("clinic")}
+              placeholder="請填寫完整名稱，避免只寫縮寫或暱稱"
+              style={{
+                width: "100%",
+                padding: "8px",
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+              }}
+            />
+          </div>
+
+          {/* 類型 */}
+          <div style={{ marginBottom: "12px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                marginBottom: "4px",
+                color: "#0f172a",
+              }}
+            >
+              類型
+            </label>
+            <select
+              value={form.type}
+              onChange={handleChange("type")}
+              style={{
+                width: "100%",
+                padding: "8px",
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+              }}
+            >
+              {TYPE_OPTIONS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 價格區塊 */}
+          <div
+            style={{
+              marginBottom: "16px",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              background: "#f9fafb",
+              fontSize: "13px",
+            }}
+          >
+            <div
+              style={{
+                marginBottom: "8px",
+                fontWeight: 600,
+                color: "#0f172a",
+              }}
+            >
+              價格（至少填一格）
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: "16px 20px",
+              }}
+            >
+              {[
+                ["price2_5mg", "2.5 mg"],
+                ["price5mg", "5 mg"],
+                ["price7_5mg", "7.5 mg"],
+                ["price10mg", "10 mg"],
+                ["price12_5mg", "12.5 mg"],
+                ["price15mg", "15 mg"],
+              ].map(([field, label]) => (
+                <div key={field}>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      marginBottom: "4px",
+                      display: "block",
+                    }}
+                  >
+                    {label}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={form[field]}
+                    onChange={handleChange(field)}
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: "13px",
+                      borderRadius: "8px",
+                      border: "1px solid #e5e7eb",
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 備註 */}
+          <div style={{ marginBottom: "14px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                marginBottom: "4px",
+                color: "#0f172a",
+              }}
+            >
+              備註（選填）
+            </label>
+            <textarea
+              value={form.note}
+              onChange={handleChange("note")}
+              rows={3}
+              style={{
+                width: "100%",
+                padding: "8px",
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+                resize: "vertical",
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              width: "100%",
+              padding: "10px",
+              borderRadius: "999px",
+              border: submitting ? "1px solid #9ca3af" : "1px solid #0d5f59",
+              fontSize: "15px",
+              fontWeight: 600,
+              cursor: submitting ? "default" : "pointer",
+              background: submitting ? "#9ca3af" : "#0f766e",
+              color: "#ffffff",
+              transition: "all 0.15s ease",
+              transform: submitting ? "scale(1)" : "scale(1)",
+            }}
+            onMouseEnter={(e) => {
+              if (!submitting) {
+                e.currentTarget.style.background = "#0d5f59";
+                e.currentTarget.style.transform = "scale(1.015)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!submitting) {
+                e.currentTarget.style.background = "#0f766e";
+                e.currentTarget.style.transform = "scale(1)";
+              }
+            }}
+          >
+            {submitting ? "送出中…" : "送出回報"}
+          </button>
+
+          <p
+            style={{
+              marginTop: "8px",
+              fontSize: "12px",
+              color: "#0f766e",
+              textAlign: "center",
+              lineHeight: 1.5,
+            }}
+          >
+            資料送出後不會直接更新主表格，會先進入回報列表，由站長不定期人工檢查、去除重複與異常資料後再更新。
+          </p>
+        </form>
       </div>
     </div>
   );
