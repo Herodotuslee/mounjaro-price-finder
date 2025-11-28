@@ -1,4 +1,92 @@
-/* ---------------- 共用元件：filter button ---------------- */
+/* ---------------- Page layout ---------------- */
+.price-page-root {
+  min-height: 100vh;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.price-page-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ---------------- Header ---------------- */
+.page-header {
+  margin-bottom: 8px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.page-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ---------------- Status text ---------------- */
+.status-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.status-text.error {
+  color: #b91c1c;
+}
+
+/* ---------------- Disclaimer / Warning ---------------- */
+.disclaimer-block {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #fef9c3;
+  color: #854d0e;
+  font-size: 14px;
+  line-height: 1.7;
+  font-weight: 600;
+}
+
+.warning-block {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ---------------- Filter / Control card ---------------- */
+.control-card {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  padding: 12px 14px 14px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* 共用 filter 按鈕 */
 .filter-btn {
   border-radius: 999px;
   border: 1px solid #cbd5f5;
@@ -7,8 +95,7 @@
   background: #ffffff;
   color: #1e293b;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease,
-    border-color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .filter-btn.active {
@@ -21,10 +108,10 @@
   background: #e5f3f1;
 }
 
-/* ---------------- Search input ---------------- */
+/* 搜尋輸入框 */
 .search-input {
+  margin-top: 4px;
   padding: 8px;
-  margin-bottom: 20px;
   max-width: 260px;
   width: 100%;
   border-radius: 8px;
@@ -32,30 +119,24 @@
   font-size: 14px;
 }
 
-/* ---------------- Warning block ---------------- */
-.warning-block {
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: #fee2e2;
-  color: #991b1b;
-  font-size: 14px;
-  line-height: 1.7;
-  font-weight: 600;
+/* ---------------- Table card (桌機版) ---------------- */
+.table-card {
+  margin-top: 8px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 8px 8px 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
-/* ---------------- Responsive table ---------------- */
 .table-scroll {
   width: 100%;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-top: 16px;
 }
 
 .price-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px; /* 避免在手機被壓太窄 */
+  min-width: 720px;
   font-size: 14px;
   color: #0f172a;
 }
@@ -72,98 +153,209 @@
   padding: 8px 6px;
   border-bottom: 1px solid #e5e7eb;
   text-align: center;
-  white-space: nowrap; /* 預設都不換行 */
+  font-size: 14px;
+  white-space: nowrap;
 }
 
-/* 城市 / 類型 / 診所名稱 不換行 */
 .price-table td.col-city,
 .price-table td.col-type,
 .price-table td.col-clinic {
   white-space: nowrap;
 }
 
-/* 備註欄：桌機顯示完整，允許換行 */
+/* 桌機備註欄 */
 .price-table td.col-note {
   white-space: normal;
   text-align: left;
-  max-width: 320px;
+  word-break: break-word;
 }
 
-/* 備註文字容器 */
-.price-table td.col-note .note-text {
+.note-text {
   font-size: 13px;
   line-height: 1.5;
 }
 
-.note-icon {
-  font-size: 14px;
+.note-toggle {
+  display: none;
 }
 
-@media (max-width: 640px) {
-  .note-toggle {
-    display: inline-flex;
-    align-items: center;
-    background: transparent;
-    border: none;
-    color: #0f766e;
-    cursor: pointer;
-    padding: 2px;
-    margin-left: 6px;
-  }
-
-  .note-icon {
-    font-size: 16px;
-  }
-}
-
-/* 編輯 icon 按鈕 */
 .report-icon-btn {
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   color: #0f766e;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
 }
 
-/* ---------------- RWD 手機優化 ---------------- */
-@media (max-width: 640px) {
-  .price-table th,
-  .price-table td {
-    padding: 6px 4px;
-    font-size: 13px;
-  }
-
-  .price-table td.col-note {
-    max-width: 220px;
-  }
-
-  /* 手機版：備註預設只顯示 2 行，超過用省略號 */
-  .price-table td.col-note .note-text {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .price-table td.col-note.note-collapsed .note-text {
-    -webkit-line-clamp: 2; /* 只顯示兩行 */
-  }
-
-  .price-table td.col-note.note-expanded .note-text {
-    -webkit-line-clamp: unset; /* 展開顯示全部 */
-  }
-
-  /* 手機版才顯示「更多 / 收合」按鈕 */
-  .note-toggle {
-    display: inline-block;
-    margin-top: 4px;
-    border: none;
-    background: transparent;
-    color: #0f766e;
-    font-size: 12px;
-    padding: 0;
-    cursor: pointer;
-  }
+.report-icon-btn:hover {
+  opacity: 1;
 }
 
-/* ---------------- Modal 區域 ---------------- */
+/* ---------------- 手機卡片版 ---------------- */
+.card-list {
+  margin-top: 10px;
+}
+
+.clinic-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.09);
+}
+
+.clinic-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.clinic-meta {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* 價格 pills */
+.clinic-prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.price-box {
+  padding: 6px 10px;
+  background: #e8f8f4; /* 淡薄荷綠 */
+  border-left: 4px solid #0f766e; /* 主色的左側指示線 */
+  font-size: 14px;
+  color: #0f766e;
+  margin-bottom: 6px;
+  margin-right: 0;
+}
+
+/* 全劑量 grid */
+.dose-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 10px;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* ---------------- 手機卡片：備註（重新設計） ---------------- */
+.clinic-note {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.note-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 2px;
+}
+
+.note-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+  white-space: pre-wrap;
+}
+/* ---------------- 手機卡片 footer：協助更新固定右下角 ---------------- */
+.clinic-footer {
+  margin-top: 10px;
+  display: flex;
+  width: 100%; /* 確定佔滿整個卡片寬度 */
+}
+
+/* 更新日期如果有留在 footer 裡，放在左側顯示 */
+.clinic-updated {
+  font-size: 11px;
+  color: #6b7280;
+  align-self: center;
+}
+
+/* 右下角的小型協助更新按鈕 */
+.clinic-edit-btn {
+  margin-left: auto; /* ⭐ 關鍵：把按鈕推到最右邊 */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #0f766e33;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.clinic-edit-btn:hover {
+  background: #ccfbf1;
+  border-color: #0f766e55;
+}
+
+.clinic-edit-icon {
+  font-size: 12px;
+}
+.donate-block {
+  background: #f8fafc;
+  padding: 20px 16px;
+  border-radius: 12px;
+  text-align: center;
+  margin-top: 32px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.donate-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #334155;
+  margin-bottom: 16px;
+}
+
+.donate-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #0f766e;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.donate-button:hover {
+  background: #0d5f59;
+  transform: scale(1.03);
+}
+
+.about-block {
+  margin-top: 18px;
+  padding-bottom: 30px;
+}
+
+.about-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #111827;
+}
+
+.about-text {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+/* ---------------- Modal ---------------- */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -186,8 +378,6 @@
 .modal-title {
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 8px;
-  color: #0f172a;
 }
 
 .modal-text {
@@ -204,24 +394,16 @@
 .modal-label {
   font-size: 12px;
   color: #4b5563;
-  display: block;
   margin-bottom: 4px;
 }
 
-.modal-input {
-  width: 100%;
-  padding: 6px 8px;
-  font-size: 12px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-}
-
+.modal-input,
 .modal-textarea {
   width: 100%;
   padding: 6px 8px;
-  font-size: 12px;
   border-radius: 6px;
   border: 1px solid #d1d5db;
+  font-size: 12px;
   resize: vertical;
 }
 
@@ -233,16 +415,14 @@
 }
 
 .modal-error {
-  font-size: 12px;
   color: #b91c1c;
-  margin-bottom: 8px;
+  font-size: 12px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 8px;
 }
 
 .btn-secondary {
@@ -251,83 +431,30 @@
   border-radius: 999px;
   border: 1px solid #e5e7eb;
   background: #ffffff;
-  cursor: pointer;
 }
 
 .btn-primary {
   padding: 6px 14px;
   font-size: 13px;
   border-radius: 999px;
-  border: 1px solid #0f766e;
   background: #0f766e;
-  color: #f9fafb;
-  cursor: pointer;
+  color: #ffffff;
+  border: 1px solid #0f766e;
 }
 
-/* 備註欄：桌機顯示完整，允許換行 */
-.price-table td.col-note {
-  white-space: normal;
-  text-align: left;
-  max-width: 320px;
-}
-
-/* 備註文字容器 */
-.price-table td.col-note .note-text {
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-/* 預設（桌機）：不顯示展開 icon */
-.note-toggle {
-  display: none;
-}
-
-/* Chevron icon 大小（共用） */
-.note-icon {
-  font-size: 14px;
-}
-
-/* ---------------- RWD 手機優化 ---------------- */
+/* ---------------- RWD ---------------- */
 @media (max-width: 640px) {
+  .price-page-root {
+    padding: 12px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
   .price-table th,
   .price-table td {
-    padding: 6px 4px;
     font-size: 13px;
-  }
-
-  .price-table td.col-note {
-    max-width: 220px;
-  }
-
-  /* 手機版：備註預設只顯示 2 行，超過用省略 */
-  .price-table td.col-note .note-text {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .price-table td.col-note.note-collapsed .note-text {
-    -webkit-line-clamp: 2; /* 只顯示兩行 */
-  }
-
-  .price-table td.col-note.note-expanded .note-text {
-    -webkit-line-clamp: unset; /* 展開顯示全部 */
-  }
-
-  /* 手機版才顯示 Chevron 按鈕 */
-  .note-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 6px;
-    border: none;
-    background: transparent;
-    color: #0f766e;
-    cursor: pointer;
-    padding: 2px;
-  }
-
-  .note-icon {
-    font-size: 16px;
+    padding: 6px 4px;
   }
 }

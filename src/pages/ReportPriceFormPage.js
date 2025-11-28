@@ -6,6 +6,7 @@ import { CITY_LABELS } from "../data/prices";
 const INITIAL_FORM = {
   city: "",
   district: "",
+  address: "", // ✅ 新增
   clinic: "",
   type: "clinic",
   price2_5mg: "",
@@ -76,6 +77,7 @@ function ReportPriceFormPage() {
     const payload = {
       city: form.city.trim(),
       district: form.district.trim() || null,
+      address: form.address.trim() || null, // ✅ 新增：地址可略
       clinic: form.clinic.trim(),
       type: form.type || null,
       price2_5mg: toNumberOrNull(form.price2_5mg),
@@ -85,12 +87,8 @@ function ReportPriceFormPage() {
       price12_5mg: toNumberOrNull(form.price12_5mg),
       price15mg: toNumberOrNull(form.price15mg),
       note: form.note.trim() || null,
-      address: null,
 
-      // 放在回報表裡的狀態，預設 pending
       status: "pending",
-
-      // 這筆價格是使用者看到的「最後更新日期」
       last_updated: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
     };
 
@@ -144,7 +142,6 @@ function ReportPriceFormPage() {
           回報表單
         </h1>
 
-        {/* 標語 */}
         <p
           style={{
             marginBottom: "12px",
@@ -155,7 +152,6 @@ function ReportPriceFormPage() {
           希望健康的體態是每個台灣人都能追求的權利，不再是遙不可及。
         </p>
 
-        {/* 說明文字 */}
         <div
           style={{
             marginBottom: "16px",
@@ -181,7 +177,6 @@ function ReportPriceFormPage() {
           </ul>
         </div>
 
-        {/* 訊息 */}
         {message && (
           <div
             style={{
@@ -248,13 +243,40 @@ function ReportPriceFormPage() {
                 color: "#0f172a",
               }}
             >
-              區域 / 行政區
+              區域 / 行政區（選填）
             </label>
             <input
               type="text"
               value={form.district}
               onChange={handleChange("district")}
               placeholder="例如：大安、信義、新莊、楠梓…"
+              style={{
+                width: "100%",
+                padding: "8px",
+                fontSize: "14px",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+              }}
+            />
+          </div>
+
+          {/* 地址（可略） */}
+          <div style={{ marginBottom: "12px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "14px",
+                marginBottom: "4px",
+                color: "#0f172a",
+              }}
+            >
+              地址（可略沒關係）
+            </label>
+            <input
+              type="text"
+              value={form.address}
+              onChange={handleChange("address")}
+              placeholder="例如：台北市信義區松山路 100 號"
               style={{
                 width: "100%",
                 padding: "8px",
@@ -292,7 +314,7 @@ function ReportPriceFormPage() {
             />
           </div>
 
-          {/* 類型：改成子彈（radio）選擇 */}
+          {/* 類型 */}
           <div style={{ marginBottom: "16px" }}>
             <label
               style={{
