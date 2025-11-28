@@ -1,185 +1,169 @@
-/* ---------------- Backdrop & card ---------------- */
+/* ---------------- Backdrop ---------------- */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.45);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 50;
+  align-items: flex-start; /* ⭐ 靠上比較不壓迫 */
+  padding: 16px;
+  z-index: 100;
 }
 
+/* ---------------- Card ---------------- */
 .modal-card {
+  width: 100%;
+  max-width: 480px;
+
+  /* 控制整體高度，超過就內部捲動 */
+  max-height: 72vh;
+  overflow-y: auto;
+
   background: #ffffff;
-  border-radius: 16px;
-  max-width: 520px;
-  width: 100%;
-  padding: 20px 18px 18px;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+  border-radius: 14px;
+  padding: 16px 16px 18px;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.35);
   box-sizing: border-box;
 }
 
-/* ---------------- Title & text ---------------- */
-.modal-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 6px;
-}
-
-.modal-text {
-  font-size: 14px;
-  color: #4b5563;
-  line-height: 1.6;
-  margin-bottom: 6px;
-}
-
-/* ---------------- Form layout ---------------- */
-.modal-row-2 {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.modal-row-2 .modal-field {
-  flex: 1 1 0;
-}
-
-.modal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.modal-label {
-  font-size: 13px;
-  color: #475569;
-  font-weight: 600;
-}
-
-/* Input & textarea */
-.modal-input {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 14px;
-  background: #ffffff;
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.modal-input:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
-}
-
-.modal-textarea {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 14px;
-  resize: vertical;
-  min-height: 72px;
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.modal-textarea:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
-}
-
-/* ---------------- Dose section ---------------- */
-.modal-dose-header {
-  margin-top: 4px;
-  margin-bottom: 8px;
-}
-
-.modal-dose-header .modal-label {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 500;
-}
-
-/* 2-column grid for dose inputs */
-.modal-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 18px;
-  margin-bottom: 16px;
-}
-
+/* 手機版再壓縮一點 padding 與高度 */
 @media (max-width: 640px) {
-  .modal-grid {
-    grid-template-columns: 1fr;
+  .modal-card {
+    max-width: 100%;
+    padding: 14px 12px 16px;
+    max-height: 68vh;
   }
 }
 
-/* Each dose card */
+/* ---------------- Title & Text ---------------- */
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.modal-text {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.55;
+  margin-bottom: 4px;
+}
+
+/* ---------------- Fields ---------------- */
+.modal-field {
+  margin-bottom: 10px;
+}
+
+.modal-label {
+  font-size: 12px;
+  margin-bottom: 3px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.modal-input,
+.modal-textarea {
+  width: 100%;
+  padding: 7px 9px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.modal-input:focus,
+.modal-textarea:focus {
+  border-color: #0f766e;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.12);
+}
+
+.modal-textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+/* ---------------- Grid for prices ---------------- */
+.modal-dose-header {
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+
+/* 外層用 flex，做兩欄 */
+.modal-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* 每一個劑量小卡片：預設 2 欄（50%） */
 .dose-field {
   background: #f8fafc;
-  border-radius: 10px;
   border: 1px solid #e2e8f0;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 8px 9px;
+  width: calc(50% - 5px); /* ⭐ 兩個一列 */
+  box-sizing: border-box;
 }
 
-/* ---------------- Error message ---------------- */
+/* 超窄螢幕再退回一欄，避免擠爆 */
+@media (max-width: 360px) {
+  .dose-field {
+    width: 100%;
+  }
+}
+
+/* ---------------- Error ---------------- */
 .modal-error {
-  margin-top: 4px;
-  margin-bottom: 8px;
-  font-size: 13px;
   color: #b91c1c;
+  font-size: 13px;
+  margin-top: 4px;
+  margin-bottom: 6px;
 }
 
-/* ---------------- Actions & buttons ---------------- */
+/* ---------------- Action Buttons ---------------- */
 .modal-actions {
-  margin-top: 14px;
+  margin-top: 10px;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-/* Secondary (cancel) button */
+/* Secondary btn */
 .btn-secondary {
   padding: 7px 14px;
   border-radius: 999px;
-  border: 1px solid #cbd5e1;
   background: #ffffff;
-  color: #475569;
+  border: 1px solid #cbd5e1;
   font-size: 13px;
-  font-weight: 500;
+  color: #475569;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .btn-secondary:hover:enabled {
   background: #f1f5f9;
-  border-color: #cbd5e1;
 }
 
-/* Primary (submit) button */
+/* Primary btn */
 .btn-primary {
   padding: 7px 16px;
   border-radius: 999px;
-  border: 1px solid #0f766e;
   background: #0f766e;
-  color: #f9fafb;
+  border: 1px solid #0f766e;
   font-size: 13px;
-  font-weight: 600;
+  color: #ffffff;
   cursor: pointer;
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
   transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
-  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.25);
 }
 
 .btn-primary:hover:enabled {
   background: #0d665f;
-  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.32);
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.3);
   transform: translateY(-0.5px);
 }
 

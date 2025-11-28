@@ -124,12 +124,6 @@ function PriceReportModal({ target, onClose }) {
     <div className="modal-backdrop" onClick={handleBackdropClick}>
       <div className="modal-card">
         <h2 className="modal-title">協助更新價格資料</h2>
-
-        <p className="modal-text">
-          感謝你協助更新這筆資料促進台灣社會善的循環🙏
-          回報內容會先進入審核列表，確認無誤後才會同步到主表格。
-        </p>
-
         {/* Low-key clinic info line */}
         <p
           style={{
