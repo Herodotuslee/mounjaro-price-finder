@@ -10,68 +10,50 @@ import {
 } from "../data/prices";
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
-import { FaRegEdit } from "react-icons/fa";
+import { FaRegEdit, FaChevronUp, FaChevronDown } from "react-icons/fa";
+// ⛔ 這兩個沒用到，可以刪掉：
+// import { MdExpandLess, MdExpandMore } from "react-icons/md";
 
 // ---------- Helper functions ----------
-
-// 小工具：避免大小寫/空白差異
 const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
 
-// 城市：selectedCity vs row.city（支援台北 / taipei / 臺北）
 const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
   if (selectedCityValue === "all") return true;
-
   const nRow = normalize(rowCityRaw);
   const nSelected = normalize(selectedCityValue);
-
   if (nRow === nSelected) return true;
 
   const keywordsForSelected = CITY_KEYWORDS[selectedCityValue] || [];
   const normalizedKeywords = keywordsForSelected.map(normalize);
-
   return normalizedKeywords.includes(nRow);
 };
 
-// 類型：selectedType vs row.type（支援 診所/clinic/c、醫院/hospital/h、藥局/pharmacy/p）
 const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
   if (selectedTypeValue === "all") return true;
-
   const nRow = normalize(rowTypeRaw || "clinic");
   const nSelected = normalize(selectedTypeValue);
-
   if (nRow === nSelected) return true;
 
   const keywordsForSelected = TYPE_KEYWORDS[selectedTypeValue] || [];
   const normalizedKeywords = keywordsForSelected.map(normalize);
-
   return normalizedKeywords.includes(nRow);
 };
 
-// 把 DB 裡的 raw type（診所 / c / clinic / 藥局 / p ...）統一轉成標準代碼
-// 標準代碼預期是：clinic / hospital / pharmacy
 const getCanonicalTypeCode = (rowTypeRaw) => {
   const n = normalize(rowTypeRaw || "clinic");
-
   if (TYPE_LABELS[n]) return n;
-
   for (const [typeCode, keywords] of Object.entries(TYPE_KEYWORDS)) {
     const normalizedKeywords = keywords.map(normalize);
-    if (normalizedKeywords.includes(n)) {
-      return typeCode;
-    }
+    if (normalizedKeywords.includes(n)) return typeCode;
   }
-
   return "clinic";
 };
 
-// Build keyword variants so that Chinese and English both work（搜尋欄用）
 const buildKeywordVariants = (kwRaw) => {
   const kw = normalize(kwRaw);
   if (!kw) return [];
-
   const variants = new Set([kw]);
 
-  // 城市中英對應
   Object.entries(CITY_KEYWORDS).forEach(([cityCode, keywords]) => {
     const normalizedKeywords = keywords.map(normalize);
     if (normalizedKeywords.includes(kw)) {
@@ -80,7 +62,6 @@ const buildKeywordVariants = (kwRaw) => {
     }
   });
 
-  // 類型中英對應
   Object.entries(TYPE_KEYWORDS).forEach(([typeCode, keywords]) => {
     const normalizedKeywords = keywords.map(normalize);
     if (normalizedKeywords.includes(kw)) {
@@ -92,7 +73,6 @@ const buildKeywordVariants = (kwRaw) => {
   return Array.from(variants);
 };
 
-// Check if a row matches the current keyword (Chinese and English aware)
 const matchesKeyword = (row, kwRaw) => {
   const variants = buildKeywordVariants(kwRaw);
   if (variants.length === 0) return true;
@@ -112,19 +92,16 @@ const matchesKeyword = (row, kwRaw) => {
   ];
 
   const normalizedFields = fields.filter(Boolean).map((v) => normalize(v));
-
   return variants.some((kw) =>
     normalizedFields.some((field) => field.includes(kw))
   );
 };
 
-// 價格顯示：null / undefined / 0 → 顯示空白
 const formatPrice = (value) => {
   if (value === null || value === undefined || value === 0) return "";
   return value;
 };
 
-// 更新日期顯示（全部顯示，只要有 last_updated；沒有就空）
 const formatLastUpdated = (lastUpdatedRaw) => {
   if (!lastUpdatedRaw) return "";
   const d = new Date(lastUpdatedRaw);
@@ -135,7 +112,6 @@ const formatLastUpdated = (lastUpdatedRaw) => {
   return `${y}/${m}/${day}`;
 };
 
-// 將 input 的字串轉成 number 或 null
 const toNullableInt = (value) => {
   if (value === "" || value === null || value === undefined) return null;
   const n = Number(value);
@@ -153,16 +129,16 @@ function PricePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 劑量顯示模式：false = 只看 5/10，true = 顯示所有劑量
   const [showAllDoses, setShowAllDoses] = useState(false);
 
-  // 協助更新用的 state
+  // 手機版：控制哪一筆備註展開
+  const [expandedNoteId, setExpandedNoteId] = useState(null);
+
   const [reportTarget, setReportTarget] = useState(null);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportError, setReportError] = useState(null);
 
   const [reportDistrict, setReportDistrict] = useState("");
-
   const [reportPrice2_5, setReportPrice2_5] = useState("");
   const [reportPrice5, setReportPrice5] = useState("");
   const [reportPrice7_5, setReportPrice7_5] = useState("");
@@ -171,7 +147,6 @@ function PricePage() {
   const [reportPrice15, setReportPrice15] = useState("");
   const [reportNote, setReportNote] = useState("");
 
-  // 🔹 Fetch data from Supabase（主表 mounjaro_data）
   useEffect(() => {
     async function fetchData() {
       try {
@@ -206,7 +181,6 @@ function PricePage() {
     fetchData();
   }, []);
 
-  // 🔍 只顯示真的有資料的城市
   const cityOptions = useMemo(() => {
     const uniqueCities = Array.from(
       new Set(rows.map((r) => r.city).filter(Boolean))
@@ -214,15 +188,12 @@ function PricePage() {
     return ["all", ...uniqueCities];
   }, [rows]);
 
-  // 🔍 Filtering logic
   const filteredData = useMemo(() => {
     const result = rows.filter((row) => {
       const rowTypeRaw = row.type;
-
       const cityOk = cityMatchesSelected(row.city, selectedCity);
       const typeOk = typeMatchesSelected(rowTypeRaw, selectedType);
       const kwOk = matchesKeyword(row, keyword);
-
       return cityOk && typeOk && kwOk;
     });
 
@@ -237,10 +208,8 @@ function PricePage() {
     return result;
   }, [rows, selectedCity, selectedType, keyword]);
 
-  // 🧮 table 欄位總數（備註 + 更新日期 + 協助更新）
   const totalColumns = showAllDoses ? 13 : 9;
 
-  // 開啟協助更新 modal，帶入該筆資料的現有值
   const openReportModal = (row) => {
     setReportTarget(row);
     setReportError(null);
@@ -261,7 +230,6 @@ function PricePage() {
     setReportSubmitting(false);
   };
 
-  // 送出協助更新 → insert 到 mounjaro_reports（status 預設 pending）
   const handleSubmitReport = async (e) => {
     e.preventDefault();
     if (!reportTarget) return;
@@ -288,9 +256,7 @@ function PricePage() {
         price15mg: toNullableInt(reportPrice15),
 
         note: reportNote || null,
-        // 讓 last_updated 設成今天（或你也可以不送，讓後端自己處理）
         last_updated: new Date().toISOString().slice(0, 10),
-        // status 用預設 'pending'
       };
 
       const res = await fetch(url, {
@@ -325,10 +291,9 @@ function PricePage() {
         <h1
           style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "6px" }}
         >
-          全台猛健樂價格整理（5mg / 10mg）
+          全國猛健樂價格整理
         </h1>
 
-        {/* 🔶 Disclaimer */}
         <div
           style={{
             marginTop: "8px",
@@ -344,7 +309,6 @@ function PricePage() {
           ⚠️ {texts.disclaimer}
         </div>
 
-        {/* Loading / Error */}
         {loading && (
           <p
             style={{ fontSize: "14px", color: "#6b7280", marginBottom: "8px" }}
@@ -425,57 +389,22 @@ function PricePage() {
           </button>
         </div>
 
-        {/* 藥局 / 醫院警語 */}
         {selectedType === "pharmacy" && (
-          <div
-            style={{
-              marginBottom: "16px",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              background: "#fee2e2",
-              color: "#991b1b",
-              fontSize: "14px",
-              lineHeight: 1.7,
-              fontWeight: 600,
-            }}
-          >
-            {texts.pharmacyWarning}
-          </div>
+          <div className="warning-block">{texts.pharmacyWarning}</div>
         )}
-
         {selectedType === "hospital" && (
-          <div
-            style={{
-              marginBottom: "16px",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              background: "#fee2e2",
-              color: "#991b1b",
-              fontSize: "14px",
-              lineHeight: 1.7,
-              fontWeight: 600,
-            }}
-          >
-            {texts.hospitalWarning}
-          </div>
+          <div className="warning-block">{texts.hospitalWarning}</div>
         )}
 
-        {/* Search bar */}
         <input
           placeholder="搜尋診所 / 地區 / 城市 / 類型"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          style={{
-            padding: "8px",
-            marginBottom: "20px",
-            maxWidth: "260px",
-            width: "100%",
-          }}
+          className="search-input"
         />
 
-        {/* Table */}
-        <div className="table-container">
-          <table>
+        <div className="table-scroll">
+          <table className="price-table">
             <thead>
               <tr>
                 <th>城市</th>
@@ -485,17 +414,17 @@ function PricePage() {
 
                 {showAllDoses ? (
                   <>
-                    <th>2.5 mg 價格</th>
-                    <th>5 mg 價格</th>
-                    <th>7.5 mg 價格</th>
-                    <th>10 mg 價格</th>
-                    <th>12.5 mg 價格</th>
-                    <th>15 mg 價格</th>
+                    <th>2.5 mg</th>
+                    <th>5 mg</th>
+                    <th>7.5 mg</th>
+                    <th>10 mg</th>
+                    <th>12.5 mg</th>
+                    <th>15 mg</th>
                   </>
                 ) : (
                   <>
-                    <th>5 mg 價格</th>
-                    <th>10 mg 價格</th>
+                    <th>5 mg</th>
+                    <th>10 mg</th>
                   </>
                 )}
 
@@ -508,15 +437,18 @@ function PricePage() {
               {filteredData.map((item, index) => {
                 const typeCode = getCanonicalTypeCode(item.type);
                 const lastUpdatedText = formatLastUpdated(item.last_updated);
+                const note = item.note || "-";
 
                 return (
                   <tr key={`${item.id}-${index}`}>
-                    <td className="table-city">
+                    <td className="col-city">
                       {CITY_LABELS[item.city] || item.city || "-"}
                     </td>
                     <td>{item.district || "-"}</td>
-                    <td>{TYPE_LABELS[typeCode] || "診所"}</td>
-                    <td>{item.clinic}</td>
+                    <td className="col-type">
+                      {TYPE_LABELS[typeCode] || "診所"}
+                    </td>
+                    <td className="col-clinic">{item.clinic}</td>
 
                     {showAllDoses ? (
                       <>
@@ -534,28 +466,39 @@ function PricePage() {
                       </>
                     )}
 
-                    <td className="table-note">{item.note || "-"}</td>
-                    <td>
-                      {lastUpdatedText && (
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            color: "#9ca3af",
-                          }}
+                    <td
+                      className={`col-note ${
+                        expandedNoteId === item.id
+                          ? "note-expanded"
+                          : "note-collapsed"
+                      }`}
+                    >
+                      <div className="note-text">{note}</div>
+
+                      {item.note && item.note.length > 30 && (
+                        <button
+                          type="button"
+                          className="note-toggle"
+                          onClick={() =>
+                            setExpandedNoteId(
+                              expandedNoteId === item.id ? null : item.id
+                            )
+                          }
                         >
-                          {lastUpdatedText}
-                        </span>
+                          {expandedNoteId === item.id ? (
+                            <FaChevronUp className="note-icon" />
+                          ) : (
+                            <FaChevronDown className="note-icon" />
+                          )}
+                        </button>
                       )}
                     </td>
                     <td>
-                      {/* <button
-                        type="button"
-                        className="report-icon-btn"
-                        onClick={() => openReportModal(item)}
-                        title="編輯 / 協助更新此筆資料"
-                      >
-                        ✏️
-                      </button> */}
+                      {lastUpdatedText && (
+                        <span className="last-updated">{lastUpdatedText}</span>
+                      )}
+                    </td>
+                    <td>
                       <FaRegEdit
                         type="button"
                         className="report-icon-btn"
@@ -581,254 +524,117 @@ function PricePage() {
           </table>
         </div>
 
-        {/* 協助更新 Modal */}
         {reportTarget && (
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(15,23,42,0.45)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 2000,
-            }}
-          >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "420px",
-                background: "#ffffff",
-                borderRadius: "16px",
-                padding: "20px",
-                boxShadow: "0 20px 40px rgba(15,23,42,0.3)",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "18px",
-                  fontWeight: 700,
-                  marginBottom: "8px",
-                  color: "#0f172a",
-                }}
-              >
-                協助更新資料
-              </h2>
+          <div className="modal-backdrop">
+            <div className="modal-card">
+              <h2 className="modal-title">協助更新資料</h2>
 
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#6b7280",
-                  marginBottom: "12px",
-                  lineHeight: 1.6,
-                }}
-              >
+              <p className="modal-text">
                 謝謝你協助維護本網站的資訊 🙏
                 <br />
                 提交後需等待站長審核，審核通過後才會正式更新到主資料表。
               </p>
 
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#6b7280",
-                  marginBottom: "12px",
-                  lineHeight: 1.6,
-                }}
-              >
+              <p className="modal-text">
                 診所：{reportTarget.city} / {reportTarget.district} /{" "}
                 {reportTarget.clinic}
               </p>
 
               <form onSubmit={handleSubmitReport}>
-                {/* 地區（選填） */}
-                <div style={{ marginBottom: "12px" }}>
-                  <label
-                    style={{
-                      fontSize: "12px",
-                      color: "#4b5563",
-                      display: "block",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    地區（選填）
-                  </label>
+                <div className="modal-field">
+                  <label className="modal-label">地區（選填）</label>
                   <input
                     type="text"
                     value={reportDistrict}
                     onChange={(e) => setReportDistrict(e.target.value)}
                     placeholder="例如：信義區、中西區⋯"
-                    style={{
-                      width: "100%",
-                      padding: "6px 8px",
-                      fontSize: "12px",
-                    }}
+                    className="modal-input"
                   />
                 </div>
 
-                {/* 劑量價格 */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "8px 12px",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                <div className="modal-grid">
+                  <label className="modal-label">
                     2.5 mg
                     <input
                       type="number"
                       value={reportPrice2_5}
                       onChange={(e) => setReportPrice2_5(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "4px 6px",
-                        fontSize: "12px",
-                      }}
+                      className="modal-input"
                     />
                   </label>
-                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                  <label className="modal-label">
                     5 mg
                     <input
                       type="number"
                       value={reportPrice5}
                       onChange={(e) => setReportPrice5(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "4px 6px",
-                        fontSize: "12px",
-                      }}
+                      className="modal-input"
                     />
                   </label>
-                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                  <label className="modal-label">
                     7.5 mg
                     <input
                       type="number"
                       value={reportPrice7_5}
                       onChange={(e) => setReportPrice7_5(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "4px 6px",
-                        fontSize: "12px",
-                      }}
+                      className="modal-input"
                     />
                   </label>
-                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                  <label className="modal-label">
                     10 mg
                     <input
                       type="number"
                       value={reportPrice10}
                       onChange={(e) => setReportPrice10(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "4px 6px",
-                        fontSize: "12px",
-                      }}
+                      className="modal-input"
                     />
                   </label>
-                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                  <label className="modal-label">
                     12.5 mg
                     <input
                       type="number"
                       value={reportPrice12_5}
                       onChange={(e) => setReportPrice12_5(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "4px 6px",
-                        fontSize: "12px",
-                      }}
+                      className="modal-input"
                     />
                   </label>
-                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                  <label className="modal-label">
                     15 mg
                     <input
                       type="number"
                       value={reportPrice15}
                       onChange={(e) => setReportPrice15(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "4px 6px",
-                        fontSize: "12px",
-                      }}
+                      className="modal-input"
                     />
                   </label>
                 </div>
 
-                {/* 備註 */}
-                <div style={{ marginBottom: "12px" }}>
-                  <label
-                    style={{
-                      fontSize: "12px",
-                      color: "#4b5563",
-                      display: "block",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    備註（選填）
-                  </label>
+                <div className="modal-field">
+                  <label className="modal-label">備註（選填）</label>
                   <textarea
                     value={reportNote}
                     onChange={(e) => setReportNote(e.target.value)}
                     rows={3}
-                    style={{
-                      width: "100%",
-                      padding: "6px 8px",
-                      fontSize: "12px",
-                      resize: "vertical",
-                    }}
+                    className="modal-textarea"
                     placeholder="例如：最近調漲、包含掛號費、分次販售等補充資訊⋯"
                   />
                 </div>
 
-                {/* 錯誤訊息 */}
-                {reportError && (
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      color: "#b91c1c",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {reportError}
-                  </p>
-                )}
+                {reportError && <p className="modal-error">{reportError}</p>}
 
-                {/* 按鈕區 */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    gap: "8px",
-                    marginTop: "8px",
-                  }}
-                >
+                <div className="modal-actions">
                   <button
                     type="button"
                     onClick={closeReportModal}
-                    style={{
-                      padding: "6px 10px",
-                      fontSize: "13px",
-                      borderRadius: "999px",
-                      border: "1px solid #e5e7eb",
-                      background: "#ffffff",
-                      cursor: reportSubmitting ? "default" : "pointer",
-                    }}
+                    className="btn-secondary"
+                    disabled={reportSubmitting}
                   >
                     取消
                   </button>
                   <button
                     type="submit"
                     disabled={reportSubmitting}
-                    style={{
-                      padding: "6px 14px",
-                      fontSize: "13px",
-                      borderRadius: "999px",
-                      border: "1px solid #0f766e",
-                      background: reportSubmitting ? "#9ca3af" : "#0f766e",
-                      color: "#f9fafb",
-                      cursor: reportSubmitting ? "default" : "pointer",
-                    }}
+                    className="btn-primary"
                   >
                     {reportSubmitting ? "提交中…" : "提交協助更新"}
                   </button>
