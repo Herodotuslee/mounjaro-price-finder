@@ -1,0 +1,131 @@
+/* src/styles/footer.css */
+
+.site-footer {
+  margin-top: 40px;
+  padding: 32px 16px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  color: #0f172a;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+.footer-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 桌機：左右並排，Donate 放左邊比較顯眼 */
+@media (min-width: 768px) {
+  .footer-inner {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .footer-donate-card {
+    flex: 1.5;
+    margin-right: 16px;
+  }
+
+  .footer-main {
+    flex: 2;
+  }
+}
+
+/* 關於本站區塊 */
+.footer-main {
+  margin-bottom: 8px;
+}
+
+.footer-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.footer-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.footer-text-sub {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Donate 卡片 */
+.footer-donate-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px 16px 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.footer-donate-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #0f172a;
+}
+
+.footer-donate-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #334155;
+  margin-bottom: 14px;
+}
+
+/* Donate 按鈕：看起來「可以按按看」，但不油膩 */
+.footer-donate-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: #0f766e;
+  color: #f9fafb;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.28);
+}
+
+.footer-donate-button:hover {
+  background: #0d665f;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.32);
+}
+
+.footer-donate-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+}
+
+.footer-donate-note {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+/* 最底部細字 */
+.footer-bottom {
+  max-width: 960px;
+  margin: 18px auto 0;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.footer-bottom-text {
+  font-size: 12px;
+  color: #94a3b8;
+}

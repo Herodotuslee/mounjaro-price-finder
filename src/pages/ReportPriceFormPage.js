@@ -2,11 +2,12 @@
 import React, { useState } from "react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import { CITY_LABELS } from "../data/prices";
+import "../styles/ReportPriceFormPage.css"; // ⭐ 新增：這頁專用樣式
 
 const INITIAL_FORM = {
   city: "",
   district: "",
-  address: "", // ✅ 新增
+  address: "",
   clinic: "",
   type: "clinic",
   price2_5mg: "",
@@ -25,6 +26,15 @@ const TYPE_OPTIONS = [
   { value: "hospital", label: "醫院" },
   { value: "pharmacy", label: "藥局" },
   { value: "medical_aesthetic", label: "醫美" },
+];
+
+const PRICE_FIELDS = [
+  { name: "price2_5mg", label: "2.5 mg", placeholder: "例如 8000" },
+  { name: "price5mg", label: "5 mg", placeholder: "例如 15000" },
+  { name: "price7_5mg", label: "7.5 mg", placeholder: "可留白" },
+  { name: "price10mg", label: "10 mg", placeholder: "可留白" },
+  { name: "price12_5mg", label: "12.5 mg", placeholder: "可留白" },
+  { name: "price15mg", label: "15 mg", placeholder: "可留白" },
 ];
 
 function ReportPriceFormPage() {
@@ -77,7 +87,7 @@ function ReportPriceFormPage() {
     const payload = {
       city: form.city.trim(),
       district: form.district.trim() || null,
-      address: form.address.trim() || null, // ✅ 新增：地址可略
+      address: form.address.trim() || null,
       clinic: form.clinic.trim(),
       type: form.type || null,
       price2_5mg: toNumberOrNull(form.price2_5mg),
@@ -87,9 +97,8 @@ function ReportPriceFormPage() {
       price12_5mg: toNumberOrNull(form.price12_5mg),
       price15mg: toNumberOrNull(form.price15mg),
       note: form.note.trim() || null,
-
       status: "pending",
-      last_updated: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+      last_updated: new Date().toISOString().slice(0, 10),
     };
 
     try {
@@ -129,44 +138,19 @@ function ReportPriceFormPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: "20px", background: "#f8fafc" }}>
-      <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-        <h1
-          style={{
-            fontSize: "24px",
-            fontWeight: "bold",
-            marginBottom: "6px",
-            color: "#0f172a",
-          }}
-        >
-          回報表單
-        </h1>
+    <div className="report-page-root">
+      <div className="report-page-inner">
+        <h1 className="report-title">回報表單</h1>
 
-        <p
-          style={{
-            marginBottom: "12px",
-            fontSize: "13px",
-            color: "#64748b",
-          }}
-        >
+        <p className="report-subtitle">
           希望健康的體態是每個台灣人都能追求的權利，不再是遙不可及。
         </p>
 
-        <div
-          style={{
-            marginBottom: "16px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            background: "#e0f2fe",
-            color: "#0f172a",
-            fontSize: "14px",
-            lineHeight: 1.7,
-          }}
-        >
-          <p style={{ marginBottom: "8px" }}>
+        <div className="report-info-block">
+          <p className="report-info-text">
             感謝你願意協助回報「合理價格」的猛健樂價格促進善的循環，這個網站是靠大家一起維護的民間資訊整理。當然，價格並非唯一因素，如果有推薦好醫師也歡迎告知！
           </p>
-          <ul style={{ paddingLeft: "18px", marginBottom: "8px" }}>
+          <ul className="report-info-list">
             <li>
               回報的資料<strong>不會直接顯示</strong>
               在主表格中，會先進入回報列表，由站長人工審核（排除重複、錯字、明顯異常價格）後再更新。
@@ -179,51 +163,24 @@ function ReportPriceFormPage() {
 
         {message && (
           <div
-            style={{
-              marginBottom: "16px",
-              padding: "10px 12px",
-              borderRadius: "8px",
-              fontSize: "14px",
-              lineHeight: 1.6,
-              background: message.type === "success" ? "#dcfce7" : "#fee2e2",
-              color: message.type === "success" ? "#166534" : "#b91c1c",
-            }}
+            className={`report-message ${
+              message.type === "success"
+                ? "report-message-success"
+                : "report-message-error"
+            }`}
           >
             {message.text}
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            background: "#ffffff",
-            padding: "16px",
-            borderRadius: "12px",
-            boxShadow: "0 1px 3px rgba(15,23,42,0.08)",
-          }}
-        >
+        <form onSubmit={handleSubmit} className="report-form">
           {/* 城市 */}
-          <div style={{ marginBottom: "12px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                marginBottom: "4px",
-                color: "#0f172a",
-              }}
-            >
-              城市（必填）
-            </label>
+          <div className="form-field">
+            <label className="form-label">城市（必填）</label>
             <select
               value={form.city}
               onChange={handleChange("city")}
-              style={{
-                width: "100%",
-                padding: "8px",
-                fontSize: "14px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-              }}
+              className="form-input"
             >
               {CITY_OPTIONS.map((c) => (
                 <option key={c} value={c}>
@@ -234,69 +191,20 @@ function ReportPriceFormPage() {
           </div>
 
           {/* 地區 */}
-          <div style={{ marginBottom: "12px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                marginBottom: "4px",
-                color: "#0f172a",
-              }}
-            >
-              區域 / 行政區（選填）
-            </label>
+          <div className="form-field">
+            <label className="form-label">區域 / 行政區（選填）</label>
             <input
               type="text"
               value={form.district}
               onChange={handleChange("district")}
               placeholder="例如：大安、信義、新莊、楠梓…"
-              style={{
-                width: "100%",
-                padding: "8px",
-                fontSize: "14px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-              }}
-            />
-          </div>
-
-          {/* 地址（可略） */}
-          <div style={{ marginBottom: "12px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                marginBottom: "4px",
-                color: "#0f172a",
-              }}
-            >
-              地址（可略沒關係）
-            </label>
-            <input
-              type="text"
-              value={form.address}
-              onChange={handleChange("address")}
-              placeholder="例如：台北市信義區松山路 100 號"
-              style={{
-                width: "100%",
-                padding: "8px",
-                fontSize: "14px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-              }}
+              className="form-input"
             />
           </div>
 
           {/* 診所 / 醫院 / 藥局 / 醫美診所 名稱 */}
-          <div style={{ marginBottom: "12px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                marginBottom: "4px",
-                color: "#0f172a",
-              }}
-            >
+          <div className="form-field">
+            <label className="form-label">
               診所 / 醫院 / 藥局 / 醫美診所名稱（必填）
             </label>
             <input
@@ -304,54 +212,22 @@ function ReportPriceFormPage() {
               value={form.clinic}
               onChange={handleChange("clinic")}
               placeholder="請填寫完整名稱，避免只寫縮寫或暱稱"
-              style={{
-                width: "100%",
-                padding: "8px",
-                fontSize: "14px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-              }}
+              className="form-input"
             />
           </div>
 
           {/* 類型 */}
-          <div style={{ marginBottom: "16px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                marginBottom: "6px",
-                color: "#0f172a",
-              }}
-            >
-              類型
-            </label>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px 16px",
-                fontSize: "14px",
-                color: "#0f172a",
-              }}
-            >
+          <div className="form-field">
+            <label className="form-label">類型</label>
+            <div className="type-options">
               {TYPE_OPTIONS.map((t) => (
-                <label
-                  key={t.value}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    cursor: "pointer",
-                  }}
-                >
+                <label key={t.value} className="type-option">
                   <input
                     type="radio"
                     name="type"
                     value={t.value}
                     checked={form.type === t.value}
                     onChange={handleChange("type")}
-                    style={{ cursor: "pointer" }}
                   />
                   <span>{t.label}</span>
                 </label>
@@ -359,93 +235,46 @@ function ReportPriceFormPage() {
             </div>
           </div>
 
-          {/* 價格區塊 */}
-          <div
-            style={{
-              marginBottom: "16px",
-              padding: "10px 12px",
-              borderRadius: "8px",
-              background: "#f9fafb",
-              fontSize: "13px",
-            }}
-          >
-            <div
-              style={{
-                marginBottom: "8px",
-                fontWeight: 600,
-                color: "#0f172a",
-              }}
-            >
-              價格（至少填一格）
+          {/* ⭐ 價格區塊（重點美化） */}
+          <div className="price-section">
+            <div className="price-section-header">
+              <div className="price-section-title">價格（至少填一格）</div>
+              <div className="price-section-subtitle">
+                請填寫單次施打自費金額，單位：新台幣。
+              </div>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                gap: "16px 20px",
-              }}
-            >
-              {[
-                ["price2_5mg", "2.5 mg"],
-                ["price5mg", "5 mg"],
-                ["price7_5mg", "7.5 mg"],
-                ["price10mg", "10 mg"],
-                ["price12_5mg", "12.5 mg"],
-                ["price15mg", "15 mg"],
-              ].map(([field, label]) => (
-                <div key={field}>
-                  <label
-                    style={{
-                      fontSize: "13px",
-                      marginBottom: "4px",
-                      display: "block",
-                    }}
-                  >
+            <div className="price-grid">
+              {PRICE_FIELDS.map(({ name, label, placeholder }) => (
+                <div key={name} className="price-field">
+                  <label className="price-label" htmlFor={name}>
                     {label}
                   </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={form[field]}
-                    onChange={handleChange(field)}
-                    style={{
-                      width: "100%",
-                      padding: "6px 8px",
-                      fontSize: "13px",
-                      borderRadius: "8px",
-                      border: "1px solid #e5e7eb",
-                    }}
-                  />
+                  <div className="price-input-row">
+                    <span className="price-prefix">NT$</span>
+                    <input
+                      id={name}
+                      type="text"
+                      inputMode="numeric"
+                      value={form[name]}
+                      onChange={handleChange(name)}
+                      className="price-input"
+                      placeholder={placeholder}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* 備註 */}
-          <div style={{ marginBottom: "14px" }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                marginBottom: "4px",
-                color: "#0f172a",
-              }}
-            >
-              備註（選填）
-            </label>
+          <div className="form-field">
+            <label className="form-label">備註（選填）</label>
             <textarea
               value={form.note}
               onChange={handleChange("note")}
               rows={3}
-              style={{
-                width: "100%",
-                padding: "8px",
-                fontSize: "14px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
-                resize: "vertical",
-              }}
+              className="form-textarea"
             />
           </div>
 
@@ -453,44 +282,12 @@ function ReportPriceFormPage() {
           <button
             type="submit"
             disabled={submitting}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "999px",
-              border: submitting ? "1px solid #9ca3af" : "1px solid #0d5f59",
-              fontSize: "15px",
-              fontWeight: 600,
-              cursor: submitting ? "default" : "pointer",
-              background: submitting ? "#9ca3af" : "#0f766e",
-              color: "#ffffff",
-              transition: "all 0.15s ease",
-              transform: submitting ? "scale(1)" : "scale(1)",
-            }}
-            onMouseEnter={(e) => {
-              if (!submitting) {
-                e.currentTarget.style.background = "#0d5f59";
-                e.currentTarget.style.transform = "scale(1.015)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!submitting) {
-                e.currentTarget.style.background = "#0f766e";
-                e.currentTarget.style.transform = "scale(1)";
-              }
-            }}
+            className="report-submit-btn"
           >
             {submitting ? "送出中…" : "送出回報"}
           </button>
 
-          <p
-            style={{
-              marginTop: "8px",
-              fontSize: "12px",
-              color: "#0f766e",
-              textAlign: "center",
-              lineHeight: 1.5,
-            }}
-          >
+          <p className="report-submit-note">
             資料送出後不會直接更新主表格，會先進入回報列表，由站長不定期人工檢查、去除重複與異常資料後再更新。
           </p>
         </form>
