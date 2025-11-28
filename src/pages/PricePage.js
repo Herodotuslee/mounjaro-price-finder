@@ -414,7 +414,7 @@ function PricePage() {
             onClick={() => setShowAllDoses(false)}
             className={`filter-btn ${!showAllDoses ? "active" : ""}`}
           >
-            只看 5 mg / 10 mg
+            常見 5 mg / 10 mg
           </button>
           <button
             type="button"
