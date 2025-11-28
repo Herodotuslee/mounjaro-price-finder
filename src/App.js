@@ -7,6 +7,7 @@ import ReportPriceFormPage from "./pages/ReportPriceFormPage";
 import AdvancedPage from "./pages/AdvancedPage"; // 🆕 新增這行
 import "./styles/navbar.css";
 import LazyPage from "./pages/LazyPage";
+import DoseCalculatorPage from "./pages/DoseCalculatorPage";
 
 function App() {
   return (
@@ -61,6 +62,12 @@ function App() {
               <div className="nav-tooltip">對深入知識有興趣的人可參考！</div>
             </li>
             <li>
+              <NavLink to="/dose" className="nav-item">
+                劑量計算器
+              </NavLink>
+            </li>
+
+            <li>
               {/* 🆕 新增進階知識入口 */}
               <NavLink to="/report" className="nav-item">
                 回報價格
@@ -109,6 +116,7 @@ function App() {
         <Route path="/health" element={<HealthPage />} />
         <Route path="/report" element={<ReportPriceFormPage />} />
         <Route path="/advanced" element={<AdvancedPage />} />
+        <Route path="/dose" element={<DoseCalculatorPage />} />
       </Routes>
     </div>
   );
