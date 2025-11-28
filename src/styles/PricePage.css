@@ -484,54 +484,14 @@
   }
 }
 
-/* 取消按鈕（次要） */
-.btn-secondary {
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #475569;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.btn-secondary:hover:enabled {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-/* 送出按鈕（主要） */
-.btn-primary {
-  padding: 7px 16px;
-  border-radius: 999px;
-  border: 1px solid #0f766e;
-  background: #0f766e;
-  color: #f9fafb;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
-  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.25);
-}
-
-.btn-primary:hover:enabled {
-  background: #0d665f;
-  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.32);
-  transform: translateY(-0.5px);
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled {
-  opacity: 0.6;
-  cursor: default;
-  box-shadow: none;
-}
-
 .modal-actions {
-  margin-top: 16px; /* ⭐ 跟上方欄位拉開距離 */
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
-  gap: 8px; /* ⭐ 兩顆按鈕之間的距離 */
+  gap: 8px;
+}
+
+.last-updated {
+  font-size: 12px;
+  color: #6b7280;
 }

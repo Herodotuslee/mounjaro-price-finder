@@ -63,10 +63,9 @@ function App() {
             </li>
             <li>
               <NavLink to="/dose" className="nav-item">
-                劑量計算器
+                劑量計算
               </NavLink>
             </li>
-
             <li>
               <NavLink to="/report" className="nav-item">
                 回報價格
