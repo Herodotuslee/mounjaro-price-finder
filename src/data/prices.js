@@ -37,13 +37,7 @@ export const TYPE_KEYWORDS = {
   all: ["all", "全部"],
 };
 
-export const TYPES = [
-  "all",
-  "clinic",
-  "hospital",
-  "pharmacy",
-  "medical_aesthetic",
-];
+export const TYPES = ["clinic", "hospital", "pharmacy", "medical_aesthetic"];
 
 export const CITY_KEYWORDS = {
   all: ["all", "全部"],

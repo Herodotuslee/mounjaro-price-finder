@@ -11,14 +11,14 @@ import {
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import { FaRegEdit, FaChevronUp, FaChevronDown } from "react-icons/fa";
-// ⛔ 這兩個沒用到，可以刪掉：
-// import { MdExpandLess, MdExpandMore } from "react-icons/md";
 
 // ---------- Helper functions ----------
 const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
 
+// 城市篩選：支援關鍵字 mapping
 const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
   if (selectedCityValue === "all") return true;
+
   const nRow = normalize(rowCityRaw);
   const nSelected = normalize(selectedCityValue);
   if (nRow === nSelected) return true;
@@ -28,8 +28,10 @@ const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
   return normalizedKeywords.includes(nRow);
 };
 
+// 類型篩選：支援 mapping
 const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
   if (selectedTypeValue === "all") return true;
+
   const nRow = normalize(rowTypeRaw || "clinic");
   const nSelected = normalize(selectedTypeValue);
   if (nRow === nSelected) return true;
@@ -39,16 +41,20 @@ const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
   return normalizedKeywords.includes(nRow);
 };
 
+// 將 raw type normalize 成 canonical type code
 const getCanonicalTypeCode = (rowTypeRaw) => {
   const n = normalize(rowTypeRaw || "clinic");
   if (TYPE_LABELS[n]) return n;
+
   for (const [typeCode, keywords] of Object.entries(TYPE_KEYWORDS)) {
     const normalizedKeywords = keywords.map(normalize);
     if (normalizedKeywords.includes(n)) return typeCode;
   }
+
   return "clinic";
 };
 
+// 建立關鍵字 variants（城市/類型 alias）
 const buildKeywordVariants = (kwRaw) => {
   const kw = normalize(kwRaw);
   if (!kw) return [];
@@ -73,6 +79,7 @@ const buildKeywordVariants = (kwRaw) => {
   return Array.from(variants);
 };
 
+// 文字搜尋
 const matchesKeyword = (row, kwRaw) => {
   const variants = buildKeywordVariants(kwRaw);
   if (variants.length === 0) return true;
@@ -119,7 +126,6 @@ const toNullableInt = (value) => {
 };
 
 // ---------- Component 本體 ----------
-
 function PricePage() {
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -129,11 +135,13 @@ function PricePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 劑量顯示：只看 5/10 或全部
   const [showAllDoses, setShowAllDoses] = useState(false);
 
-  // 手機版：控制哪一筆備註展開
+  // 手機版 & table：控制哪一筆備註展開
   const [expandedNoteId, setExpandedNoteId] = useState(null);
 
+  // 協助更新 Modal 狀態
   const [reportTarget, setReportTarget] = useState(null);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportError, setReportError] = useState(null);
@@ -145,8 +153,24 @@ function PricePage() {
   const [reportPrice10, setReportPrice10] = useState("");
   const [reportPrice12_5, setReportPrice12_5] = useState("");
   const [reportPrice15, setReportPrice15] = useState("");
+  const [reportAddress, setReportAddress] = useState("");
   const [reportNote, setReportNote] = useState("");
 
+  // 判斷是否為手機寬度（簡單版）
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= 640 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window === "undefined") return;
+      setIsMobile(window.innerWidth <= 640);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 載入 Supabase 資料
   useEffect(() => {
     async function fetchData() {
       try {
@@ -181,6 +205,7 @@ function PricePage() {
     fetchData();
   }, []);
 
+  // 城市選項（自動從資料抓）
   const cityOptions = useMemo(() => {
     const uniqueCities = Array.from(
       new Set(rows.map((r) => r.city).filter(Boolean))
@@ -188,6 +213,7 @@ function PricePage() {
     return ["all", ...uniqueCities];
   }, [rows]);
 
+  // 篩選 + 搜尋
   const filteredData = useMemo(() => {
     const result = rows.filter((row) => {
       const rowTypeRaw = row.type;
@@ -210,10 +236,11 @@ function PricePage() {
 
   const totalColumns = showAllDoses ? 13 : 9;
 
+  // 開啟協助更新 modal
   const openReportModal = (row) => {
     setReportTarget(row);
     setReportError(null);
-
+    setReportAddress(row.address ?? "");
     setReportDistrict(row.district ?? "");
     setReportPrice2_5(row.price2_5mg ?? "");
     setReportPrice5(row.price5mg ?? "");
@@ -230,6 +257,7 @@ function PricePage() {
     setReportSubmitting(false);
   };
 
+  // 提交協助更新
   const handleSubmitReport = async (e) => {
     e.preventDefault();
     if (!reportTarget) return;
@@ -245,9 +273,8 @@ function PricePage() {
         district: reportDistrict || reportTarget.district || null,
         clinic: reportTarget.clinic,
         type: reportTarget.type || "clinic",
-        address: reportTarget.address,
         is_cosmetic: reportTarget.is_cosmetic ?? false,
-
+        address: reportAddress || reportTarget.address || null,
         price2_5mg: toNullableInt(reportPrice2_5),
         price5mg: toNullableInt(reportPrice5),
         price7_5mg: toNullableInt(reportPrice7_5),
@@ -286,244 +313,332 @@ function PricePage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: "20px", background: "#f8fafc" }}>
-      <div style={{ maxWidth: "1000px", margin: "auto" }}>
-        <h1
-          style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "6px" }}
-        >
-          全國猛健樂價格整理
-        </h1>
-
-        <div
-          style={{
-            marginTop: "8px",
-            marginBottom: "12px",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            background: "#fef3c7",
-            fontWeight: 600,
-            color: "#92400e",
-            lineHeight: 1.6,
-          }}
-        >
-          ⚠️ {texts.disclaimer}
-        </div>
-
-        {loading && (
-          <p
-            style={{ fontSize: "14px", color: "#6b7280", marginBottom: "8px" }}
-          >
-            正在載入最新價格資料⋯⋯
+    <div className="price-page-root">
+      <div className="price-page-inner">
+        {/* 頁首 */}
+        <header className="page-header">
+          <h1 className="page-title">全國猛健樂價格整理</h1>
+          <p className="page-subtitle">
+            整理台灣各縣市診所與藥局的自費價格資訊，方便查詢與比較。
           </p>
-        )}
-        {error && (
-          <p
-            style={{ fontSize: "14px", color: "#b91c1c", marginBottom: "8px" }}
-          >
-            {error}
-          </p>
-        )}
+        </header>
 
-        {/* City filter */}
-        <div
-          style={{
-            marginBottom: "12px",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "8px",
-          }}
-        >
-          {cityOptions.map((c) => (
+        {/* 主要 disclaimer */}
+        <div className="disclaimer-block">⚠️ {texts.disclaimer}</div>
+
+        {loading && <p className="status-text">正在載入最新價格資料⋯⋯</p>}
+        {error && <p className="status-text error">{error}</p>}
+
+        {/* Filter 區域（卡片） */}
+        <section className="control-card">
+          {/* 城市 filter */}
+          <div className="filter-group">
+            {cityOptions.map((c) => (
+              <button
+                key={c}
+                onClick={() => setSelectedCity(c)}
+                className={`filter-btn ${c === selectedCity ? "active" : ""}`}
+              >
+                {c === "all" ? "全部城市" : CITY_LABELS[c] || c}
+              </button>
+            ))}
+          </div>
+
+          {/* 類型 filter */}
+          <div className="filter-group">
             <button
-              key={c}
-              onClick={() => setSelectedCity(c)}
-              className={`filter-btn ${c === selectedCity ? "active" : ""}`}
+              type="button"
+              onClick={() => setSelectedType("all")}
+              className={`filter-btn ${selectedType === "all" ? "active" : ""}`}
             >
-              {c === "all" ? "全部城市" : c}
+              全部類型
             </button>
-          ))}
-        </div>
+            {TYPES.map((t) => (
+              <button
+                key={t}
+                onClick={() => setSelectedType(t)}
+                className={`filter-btn ${t === selectedType ? "active" : ""}`}
+              >
+                {TYPE_LABELS[t] || t}
+              </button>
+            ))}
+          </div>
 
-        {/* Type filter */}
-        <div
-          style={{
-            marginBottom: "12px",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "8px",
-          }}
-        >
-          {TYPES.map((t) => (
+          {/* 劑量顯示模式切換 */}
+          <div className="filter-group">
             <button
-              key={t}
-              onClick={() => setSelectedType(t)}
-              className={`filter-btn ${t === selectedType ? "active" : ""}`}
+              type="button"
+              onClick={() => setShowAllDoses(false)}
+              className={`filter-btn ${!showAllDoses ? "active" : ""}`}
             >
-              {t === "all" ? "全部類型" : TYPE_LABELS[t]}
+              常見 5 mg / 10 mg
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              onClick={() => setShowAllDoses(true)}
+              className={`filter-btn ${showAllDoses ? "active" : ""}`}
+            >
+              顯示所有劑量
+            </button>
+          </div>
 
-        {/* 劑量顯示模式切換 */}
-        <div
-          style={{
-            marginBottom: "16px",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "8px",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setShowAllDoses(false)}
-            className={`filter-btn ${!showAllDoses ? "active" : ""}`}
-          >
-            常見 5 mg / 10 mg
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowAllDoses(true)}
-            className={`filter-btn ${showAllDoses ? "active" : ""}`}
-          >
-            顯示所有劑量
-          </button>
-        </div>
+          {/* 類型警語 */}
+          {selectedType === "pharmacy" && (
+            <div className="warning-block">{texts.pharmacyWarning}</div>
+          )}
+          {selectedType === "hospital" && (
+            <div className="warning-block">{texts.hospitalWarning}</div>
+          )}
 
-        {selectedType === "pharmacy" && (
-          <div className="warning-block">{texts.pharmacyWarning}</div>
-        )}
-        {selectedType === "hospital" && (
-          <div className="warning-block">{texts.hospitalWarning}</div>
-        )}
+          {/* 搜尋欄位 */}
+          <input
+            placeholder="搜尋診所 / 地區 / 城市 / 類型"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="search-input"
+          />
+        </section>
 
-        <input
-          placeholder="搜尋診所 / 地區 / 城市 / 類型"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          className="search-input"
-        />
+        {/* 結果區：手機用 card，桌機用表格 */}
+        {!loading && !error && (
+          <>
+            {isMobile ? (
+              <section className="card-list">
+                {filteredData.map((item, index) => {
+                  const typeCode = getCanonicalTypeCode(item.type);
+                  const note = item.note || "";
+                  const price2_5 = formatPrice(item.price2_5mg);
+                  const price5 = formatPrice(item.price5mg);
+                  const price7_5 = formatPrice(item.price7_5mg);
+                  const price10 = formatPrice(item.price10mg);
+                  const price12_5 = formatPrice(item.price12_5mg);
+                  const price15 = formatPrice(item.price15mg);
 
-        <div className="table-scroll">
-          <table className="price-table">
-            <thead>
-              <tr>
-                <th>城市</th>
-                <th>地區</th>
-                <th>類型</th>
-                <th>名稱</th>
-
-                {showAllDoses ? (
-                  <>
-                    <th>2.5 mg</th>
-                    <th>5 mg</th>
-                    <th>7.5 mg</th>
-                    <th>10 mg</th>
-                    <th>12.5 mg</th>
-                    <th>15 mg</th>
-                  </>
-                ) : (
-                  <>
-                    <th>5 mg</th>
-                    <th>10 mg</th>
-                  </>
-                )}
-
-                <th>備註</th>
-                <th>更新日期</th>
-                <th>協助更新</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((item, index) => {
-                const typeCode = getCanonicalTypeCode(item.type);
-                const lastUpdatedText = formatLastUpdated(item.last_updated);
-                const note = item.note || "-";
-
-                return (
-                  <tr key={`${item.id}-${index}`}>
-                    <td className="col-city">
-                      {CITY_LABELS[item.city] || item.city || "-"}
-                    </td>
-                    <td>{item.district || "-"}</td>
-                    <td className="col-type">
-                      {TYPE_LABELS[typeCode] || "診所"}
-                    </td>
-                    <td className="col-clinic">{item.clinic}</td>
-
-                    {showAllDoses ? (
-                      <>
-                        <td>{formatPrice(item.price2_5mg) || "-"}</td>
-                        <td>{formatPrice(item.price5mg) || "-"}</td>
-                        <td>{formatPrice(item.price7_5mg) || "-"}</td>
-                        <td>{formatPrice(item.price10mg) || "-"}</td>
-                        <td>{formatPrice(item.price12_5mg) || "-"}</td>
-                        <td>{formatPrice(item.price15mg) || "-"}</td>
-                      </>
-                    ) : (
-                      <>
-                        <td>{formatPrice(item.price5mg) || "-"}</td>
-                        <td>{formatPrice(item.price10mg) || "-"}</td>
-                      </>
-                    )}
-
-                    <td
-                      className={`col-note ${
-                        expandedNoteId === item.id
-                          ? "note-expanded"
-                          : "note-collapsed"
-                      }`}
+                  return (
+                    <article
+                      key={`${item.id}-${index}-card`}
+                      className="clinic-card"
                     >
-                      <div className="note-text">{note}</div>
+                      <div className="clinic-card-header">
+                        <div className="clinic-name">
+                          {item.clinic || "未命名診所"}
+                        </div>
+                        <div className="clinic-meta">
+                          <span>
+                            {CITY_LABELS[item.city] || item.city || "-"}
+                          </span>
+                          {item.district && <span> · {item.district}</span>}
+                          <span> · {TYPE_LABELS[typeCode] || "診所"}</span>
+                        </div>
+                      </div>
 
-                      {item.note && item.note.length > 30 && (
+                      <div className="clinic-prices">
+                        {showAllDoses ? (
+                          <div className="dose-grid">
+                            {price2_5 && <span>2.5 mg：{price2_5}</span>}
+                            {price5 && <span>5 mg：{price5}</span>}
+                            {price7_5 && <span>7.5 mg：{price7_5}</span>}
+                            {price10 && <span>10 mg：{price10}</span>}
+                            {price12_5 && <span>12.5 mg：{price12_5}</span>}
+                            {price15 && <span>15 mg：{price15}</span>}
+                          </div>
+                        ) : (
+                          <>
+                            {price5 && (
+                              <span className="price-box">5 mg：{price5}</span>
+                            )}
+                            {price10 && (
+                              <span className="price-box">
+                                10 mg：{price10}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {note && (
+                        <div className="clinic-note">
+                          <div className="note-text">{note}</div>
+                        </div>
+                      )}
+                      <div className="clinic-footer">
                         <button
                           type="button"
-                          className="note-toggle"
-                          onClick={() =>
-                            setExpandedNoteId(
-                              expandedNoteId === item.id ? null : item.id
-                            )
-                          }
+                          className="clinic-edit-btn"
+                          onClick={() => openReportModal(item)}
                         >
-                          {expandedNoteId === item.id ? (
-                            <FaChevronUp className="note-icon" />
-                          ) : (
-                            <FaChevronDown className="note-icon" />
-                          )}
+                          <FaRegEdit className="clinic-edit-icon" />
+                          <span>協助更新</span>
                         </button>
-                      )}
-                    </td>
-                    <td>
-                      {lastUpdatedText && (
-                        <span className="last-updated">{lastUpdatedText}</span>
-                      )}
-                    </td>
-                    <td>
-                      <FaRegEdit
-                        type="button"
-                        className="report-icon-btn"
-                        onClick={() => openReportModal(item)}
-                        title="編輯 / 協助更新此筆資料"
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
+                      </div>
+                    </article>
+                  );
+                })}
 
-              {!loading && filteredData.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={totalColumns}
-                    style={{ textAlign: "center", padding: "12px" }}
-                  >
-                    目前沒有符合條件的資料。
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                {filteredData.length === 0 && (
+                  <p className="status-text">目前沒有符合條件的資料。</p>
+                )}
+              </section>
+            ) : (
+              <section className="table-card">
+                <div className="table-scroll">
+                  <table className="price-table">
+                    <thead>
+                      <tr>
+                        <th>城市</th>
+                        <th>地區</th>
+                        <th>類型</th>
+                        <th>名稱</th>
 
+                        {showAllDoses ? (
+                          <>
+                            <th>2.5 mg</th>
+                            <th>5 mg</th>
+                            <th>7.5 mg</th>
+                            <th>10 mg</th>
+                            <th>12.5 mg</th>
+                            <th>15 mg</th>
+                          </>
+                        ) : (
+                          <>
+                            <th>5 mg</th>
+                            <th>10 mg</th>
+                          </>
+                        )}
+
+                        <th>備註</th>
+                        <th>更新日期</th>
+                        <th>協助更新</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredData.map((item, index) => {
+                        const typeCode = getCanonicalTypeCode(item.type);
+                        const lastUpdatedText = formatLastUpdated(
+                          item.last_updated
+                        );
+                        const note = item.note || "-";
+                        const isExpanded = expandedNoteId === item.id;
+
+                        return (
+                          <tr key={`${item.id}-${index}-row`}>
+                            <td className="col-city">
+                              {CITY_LABELS[item.city] || item.city || "-"}
+                            </td>
+                            <td>{item.district || "-"}</td>
+                            <td className="col-type">
+                              {TYPE_LABELS[typeCode] || "診所"}
+                            </td>
+                            <td className="col-clinic">{item.clinic}</td>
+
+                            {showAllDoses ? (
+                              <>
+                                <td>{formatPrice(item.price2_5mg) || "-"}</td>
+                                <td>{formatPrice(item.price5mg) || "-"}</td>
+                                <td>{formatPrice(item.price7_5mg) || "-"}</td>
+                                <td>{formatPrice(item.price10mg) || "-"}</td>
+                                <td>{formatPrice(item.price12_5mg) || "-"}</td>
+                                <td>{formatPrice(item.price15mg) || "-"}</td>
+                              </>
+                            ) : (
+                              <>
+                                <td>{formatPrice(item.price5mg) || "-"}</td>
+                                <td>{formatPrice(item.price10mg) || "-"}</td>
+                              </>
+                            )}
+
+                            <td
+                              className={`col-note ${
+                                isExpanded ? "note-expanded" : "note-collapsed"
+                              }`}
+                            >
+                              <div className="note-text">{note}</div>
+                              {item.note && item.note.length > 30 && (
+                                <button
+                                  type="button"
+                                  className="note-toggle"
+                                  onClick={() =>
+                                    setExpandedNoteId(
+                                      isExpanded ? null : item.id
+                                    )
+                                  }
+                                >
+                                  {isExpanded ? (
+                                    <FaChevronUp className="note-icon" />
+                                  ) : (
+                                    <FaChevronDown className="note-icon" />
+                                  )}
+                                </button>
+                              )}
+                            </td>
+                            <td>
+                              {lastUpdatedText && (
+                                <span className="last-updated">
+                                  {lastUpdatedText}
+                                </span>
+                              )}
+                            </td>
+                            <td>
+                              <FaRegEdit
+                                type="button"
+                                className="report-icon-btn"
+                                onClick={() => openReportModal(item)}
+                                title="編輯 / 協助更新此筆資料"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                      {filteredData.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={totalColumns}
+                            style={{ textAlign: "center", padding: "12px" }}
+                          >
+                            目前沒有符合條件的資料。
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {/* Donate 區塊 */}
+        <section className="donate-block">
+          <p className="donate-text">
+            這個網站由我自費維護，也靠許多網友一起整理與回報最新價格，是完全鄉民自發維護的資訊平台。
+            <br />
+            如果這些內容有幫助到你，歡迎請我喝杯咖啡，支持我把資料持續整理得更完善！
+          </p>
+
+          <a
+            href="https://buymeacoffee.com/holaalbertc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="donate-button"
+          >
+            ☕ 請我喝杯咖啡
+          </a>
+        </section>
+
+        {/* 關於本站 */}
+        <section className="about-block">
+          <h2 className="about-title">關於這個網站</h2>
+          <p className="about-text">
+            一開始自己在找猛健樂價格時，發現資訊非常不透明， 我曾經為 5 mg 花了
+            15000 元，甚至看到不少人為不必要的智商稅商品組合一隻5mg付到 32000
+            元。因此決定把全台資訊集中整理，讓大家能更快速找到合理的價格與適合的醫師。
+            這裡的內容完全民間自發整理，不提供醫療診斷；
+            所有決策仍需與合格醫師討論。希望這份整理能讓更多人節省時間與金錢，
+            也減少資訊不對稱造成的花費負擔。
+          </p>
+        </section>
+
+        {/* 協助更新 Modal */}
         {reportTarget && (
           <div className="modal-backdrop">
             <div className="modal-card">
@@ -541,74 +656,101 @@ function PricePage() {
               </p>
 
               <form onSubmit={handleSubmitReport}>
-                <div className="modal-field">
-                  <label className="modal-label">地區（選填）</label>
-                  <input
-                    type="text"
-                    value={reportDistrict}
-                    onChange={(e) => setReportDistrict(e.target.value)}
-                    placeholder="例如：信義區、中西區⋯"
-                    className="modal-input"
-                  />
+                {/* 地區 + 地址：兩欄排版 */}
+                <div className="modal-row-2">
+                  <div className="modal-field">
+                    <label className="modal-label">地區（選填）</label>
+                    <input
+                      type="text"
+                      value={reportDistrict}
+                      onChange={(e) => setReportDistrict(e.target.value)}
+                      placeholder="例如：信義區、中西區⋯"
+                      className="modal-input"
+                    />
+                  </div>
+
+                  <div className="modal-field">
+                    <label className="modal-label">地址（可略）</label>
+                    <input
+                      type="text"
+                      value={reportAddress}
+                      onChange={(e) => setReportAddress(e.target.value)}
+                      className="modal-input"
+                    />
+                  </div>
                 </div>
 
+                {/* 劑量區：2 欄 grid，視覺上比較有秩序 */}
                 <div className="modal-grid">
-                  <label className="modal-label">
-                    2.5 mg
-                    <input
-                      type="number"
-                      value={reportPrice2_5}
-                      onChange={(e) => setReportPrice2_5(e.target.value)}
-                      className="modal-input"
-                    />
-                  </label>
-                  <label className="modal-label">
-                    5 mg
-                    <input
-                      type="number"
-                      value={reportPrice5}
-                      onChange={(e) => setReportPrice5(e.target.value)}
-                      className="modal-input"
-                    />
-                  </label>
-                  <label className="modal-label">
-                    7.5 mg
-                    <input
-                      type="number"
-                      value={reportPrice7_5}
-                      onChange={(e) => setReportPrice7_5(e.target.value)}
-                      className="modal-input"
-                    />
-                  </label>
-                  <label className="modal-label">
-                    10 mg
-                    <input
-                      type="number"
-                      value={reportPrice10}
-                      onChange={(e) => setReportPrice10(e.target.value)}
-                      className="modal-input"
-                    />
-                  </label>
-                  <label className="modal-label">
-                    12.5 mg
-                    <input
-                      type="number"
-                      value={reportPrice12_5}
-                      onChange={(e) => setReportPrice12_5(e.target.value)}
-                      className="modal-input"
-                    />
-                  </label>
-                  <label className="modal-label">
-                    15 mg
-                    <input
-                      type="number"
-                      value={reportPrice15}
-                      onChange={(e) => setReportPrice15(e.target.value)}
-                      className="modal-input"
-                    />
-                  </label>
+                  <div className="modal-field">
+                    <label className="modal-label">
+                      2.5 mg
+                      <input
+                        type="number"
+                        value={reportPrice2_5}
+                        onChange={(e) => setReportPrice2_5(e.target.value)}
+                        className="modal-input"
+                      />
+                    </label>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-label">
+                      5 mg
+                      <input
+                        type="number"
+                        value={reportPrice5}
+                        onChange={(e) => setReportPrice5(e.target.value)}
+                        className="modal-input"
+                      />
+                    </label>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-label">
+                      7.5 mg
+                      <input
+                        type="number"
+                        value={reportPrice7_5}
+                        onChange={(e) => setReportPrice7_5(e.target.value)}
+                        className="modal-input"
+                      />
+                    </label>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-label">
+                      10 mg
+                      <input
+                        type="number"
+                        value={reportPrice10}
+                        onChange={(e) => setReportPrice10(e.target.value)}
+                        className="modal-input"
+                      />
+                    </label>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-label">
+                      12.5 mg
+                      <input
+                        type="number"
+                        value={reportPrice12_5}
+                        onChange={(e) => setReportPrice12_5(e.target.value)}
+                        className="modal-input"
+                      />
+                    </label>
+                  </div>
+                  <div className="modal-field">
+                    <label className="modal-label">
+                      15 mg
+                      <input
+                        type="number"
+                        value={reportPrice15}
+                        onChange={(e) => setReportPrice15(e.target.value)}
+                        className="modal-input"
+                      />
+                    </label>
+                  </div>
                 </div>
 
+                {/* 備註 */}
                 <div className="modal-field">
                   <label className="modal-label">備註（選填）</label>
                   <textarea
