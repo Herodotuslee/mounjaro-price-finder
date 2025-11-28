@@ -10,8 +10,9 @@ import {
 } from "../data/prices";
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
+import { FaRegEdit } from "react-icons/fa";
 
-// ---------- Helper functions (搬到 component 外面，避免 useMemo dependency 問題) ----------
+// ---------- Helper functions ----------
 
 // 小工具：避免大小寫/空白差異
 const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
@@ -23,7 +24,6 @@ const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
   const nRow = normalize(rowCityRaw);
   const nSelected = normalize(selectedCityValue);
 
-  // 完全相同（row.city 已經是「台北」或「taipei」等）
   if (nRow === nSelected) return true;
 
   const keywordsForSelected = CITY_KEYWORDS[selectedCityValue] || [];
@@ -36,7 +36,6 @@ const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
 const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
   if (selectedTypeValue === "all") return true;
 
-  // 空 type 視為診所
   const nRow = normalize(rowTypeRaw || "clinic");
   const nSelected = normalize(selectedTypeValue);
 
@@ -53,18 +52,15 @@ const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
 const getCanonicalTypeCode = (rowTypeRaw) => {
   const n = normalize(rowTypeRaw || "clinic");
 
-  // 1) 已經是標準代碼（TYPE_LABELS 有這個 key）
   if (TYPE_LABELS[n]) return n;
 
-  // 2) 用 TYPE_KEYWORDS 反查，例如 "藥局"、"p" → "pharmacy"
   for (const [typeCode, keywords] of Object.entries(TYPE_KEYWORDS)) {
     const normalizedKeywords = keywords.map(normalize);
     if (normalizedKeywords.includes(n)) {
-      return typeCode; // e.g. "pharmacy"
+      return typeCode;
     }
   }
 
-  // 3) 實在看不懂就當診所
   return "clinic";
 };
 
@@ -75,7 +71,7 @@ const buildKeywordVariants = (kwRaw) => {
 
   const variants = new Set([kw]);
 
-  // 🔹 城市中英對應
+  // 城市中英對應
   Object.entries(CITY_KEYWORDS).forEach(([cityCode, keywords]) => {
     const normalizedKeywords = keywords.map(normalize);
     if (normalizedKeywords.includes(kw)) {
@@ -84,7 +80,7 @@ const buildKeywordVariants = (kwRaw) => {
     }
   });
 
-  // 🔹 類型中英對應
+  // 類型中英對應
   Object.entries(TYPE_KEYWORDS).forEach(([typeCode, keywords]) => {
     const normalizedKeywords = keywords.map(normalize);
     if (normalizedKeywords.includes(kw)) {
@@ -99,7 +95,7 @@ const buildKeywordVariants = (kwRaw) => {
 // Check if a row matches the current keyword (Chinese and English aware)
 const matchesKeyword = (row, kwRaw) => {
   const variants = buildKeywordVariants(kwRaw);
-  if (variants.length === 0) return true; // 沒輸入關鍵字就當作有 match
+  if (variants.length === 0) return true;
 
   const typeCode = getCanonicalTypeCode(row.type);
   const cityCode = row.city || "";
@@ -139,6 +135,13 @@ const formatLastUpdated = (lastUpdatedRaw) => {
   return `${y}/${m}/${day}`;
 };
 
+// 將 input 的字串轉成 number 或 null
+const toNullableInt = (value) => {
+  if (value === "" || value === null || value === undefined) return null;
+  const n = Number(value);
+  return Number.isNaN(n) ? null : n;
+};
+
 // ---------- Component 本體 ----------
 
 function PricePage() {
@@ -150,7 +153,25 @@ function PricePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 🔹 Fetch data from Supabase
+  // 劑量顯示模式：false = 只看 5/10，true = 顯示所有劑量
+  const [showAllDoses, setShowAllDoses] = useState(false);
+
+  // 協助更新用的 state
+  const [reportTarget, setReportTarget] = useState(null);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportError, setReportError] = useState(null);
+
+  const [reportDistrict, setReportDistrict] = useState("");
+
+  const [reportPrice2_5, setReportPrice2_5] = useState("");
+  const [reportPrice5, setReportPrice5] = useState("");
+  const [reportPrice7_5, setReportPrice7_5] = useState("");
+  const [reportPrice10, setReportPrice10] = useState("");
+  const [reportPrice12_5, setReportPrice12_5] = useState("");
+  const [reportPrice15, setReportPrice15] = useState("");
+  const [reportNote, setReportNote] = useState("");
+
+  // 🔹 Fetch data from Supabase（主表 mounjaro_data）
   useEffect(() => {
     async function fetchData() {
       try {
@@ -185,10 +206,10 @@ function PricePage() {
     fetchData();
   }, []);
 
-  // 🔍 只顯示真的有資料的城市（用資料庫裡的中文 city）
+  // 🔍 只顯示真的有資料的城市
   const cityOptions = useMemo(() => {
     const uniqueCities = Array.from(
-      new Set(rows.map((r) => r.city).filter(Boolean)) // e.g. "台北", "新北"
+      new Set(rows.map((r) => r.city).filter(Boolean))
     );
     return ["all", ...uniqueCities];
   }, [rows]);
@@ -215,6 +236,88 @@ function PricePage() {
 
     return result;
   }, [rows, selectedCity, selectedType, keyword]);
+
+  // 🧮 table 欄位總數（備註 + 更新日期 + 協助更新）
+  const totalColumns = showAllDoses ? 13 : 9;
+
+  // 開啟協助更新 modal，帶入該筆資料的現有值
+  const openReportModal = (row) => {
+    setReportTarget(row);
+    setReportError(null);
+
+    setReportDistrict(row.district ?? "");
+    setReportPrice2_5(row.price2_5mg ?? "");
+    setReportPrice5(row.price5mg ?? "");
+    setReportPrice7_5(row.price7_5mg ?? "");
+    setReportPrice10(row.price10mg ?? "");
+    setReportPrice12_5(row.price12_5mg ?? "");
+    setReportPrice15(row.price15mg ?? "");
+    setReportNote(row.note ?? "");
+  };
+
+  const closeReportModal = () => {
+    setReportTarget(null);
+    setReportError(null);
+    setReportSubmitting(false);
+  };
+
+  // 送出協助更新 → insert 到 mounjaro_reports（status 預設 pending）
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    if (!reportTarget) return;
+
+    try {
+      setReportSubmitting(true);
+      setReportError(null);
+
+      const url = `${SUPABASE_URL}/rest/v1/mounjaro_reports`;
+
+      const body = {
+        city: reportTarget.city,
+        district: reportDistrict || reportTarget.district || null,
+        clinic: reportTarget.clinic,
+        type: reportTarget.type || "clinic",
+        address: reportTarget.address,
+        is_cosmetic: reportTarget.is_cosmetic ?? false,
+
+        price2_5mg: toNullableInt(reportPrice2_5),
+        price5mg: toNullableInt(reportPrice5),
+        price7_5mg: toNullableInt(reportPrice7_5),
+        price10mg: toNullableInt(reportPrice10),
+        price12_5mg: toNullableInt(reportPrice12_5),
+        price15mg: toNullableInt(reportPrice15),
+
+        note: reportNote || null,
+        // 讓 last_updated 設成今天（或你也可以不送，讓後端自己處理）
+        last_updated: new Date().toISOString().slice(0, 10),
+        // status 用預設 'pending'
+      };
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`HTTP ${res.status}: ${text}`);
+      }
+
+      alert("已送出協助更新，感謝你幫忙維護資訊！");
+      closeReportModal();
+    } catch (err) {
+      console.error("❌ 協助更新送出失敗：", err);
+      setReportError("送出失敗，請稍後再試。");
+    } finally {
+      setReportSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ minHeight: "100vh", padding: "20px", background: "#f8fafc" }}>
@@ -257,7 +360,7 @@ function PricePage() {
           </p>
         )}
 
-        {/* City filter（按鈕文字用中文，且只顯示有資料的城市） */}
+        {/* City filter */}
         <div
           style={{
             marginBottom: "12px",
@@ -297,7 +400,32 @@ function PricePage() {
           ))}
         </div>
 
-        {/* ⭐ Pharmacy warning displayed only when pharmacy is selected */}
+        {/* 劑量顯示模式切換 */}
+        <div
+          style={{
+            marginBottom: "16px",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "8px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowAllDoses(false)}
+            className={`filter-btn ${!showAllDoses ? "active" : ""}`}
+          >
+            只看 5 mg / 10 mg
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAllDoses(true)}
+            className={`filter-btn ${showAllDoses ? "active" : ""}`}
+          >
+            顯示所有劑量
+          </button>
+        </div>
+
+        {/* 藥局 / 醫院警語 */}
         {selectedType === "pharmacy" && (
           <div
             style={{
@@ -315,7 +443,6 @@ function PricePage() {
           </div>
         )}
 
-        {/* ⭐ Hospital warning */}
         {selectedType === "hospital" && (
           <div
             style={{
@@ -355,10 +482,26 @@ function PricePage() {
                 <th>地區</th>
                 <th>類型</th>
                 <th>名稱</th>
-                <th>5 mg 價格</th>
-                <th>10 mg 價格</th>
+
+                {showAllDoses ? (
+                  <>
+                    <th>2.5 mg 價格</th>
+                    <th>5 mg 價格</th>
+                    <th>7.5 mg 價格</th>
+                    <th>10 mg 價格</th>
+                    <th>12.5 mg 價格</th>
+                    <th>15 mg 價格</th>
+                  </>
+                ) : (
+                  <>
+                    <th>5 mg 價格</th>
+                    <th>10 mg 價格</th>
+                  </>
+                )}
+
                 <th>備註</th>
                 <th>更新日期</th>
+                <th>協助更新</th>
               </tr>
             </thead>
             <tbody>
@@ -374,8 +517,23 @@ function PricePage() {
                     <td>{item.district || "-"}</td>
                     <td>{TYPE_LABELS[typeCode] || "診所"}</td>
                     <td>{item.clinic}</td>
-                    <td>{formatPrice(item.price5mg) || "-"}</td>
-                    <td>{formatPrice(item.price10mg) || "-"}</td>
+
+                    {showAllDoses ? (
+                      <>
+                        <td>{formatPrice(item.price2_5mg) || "-"}</td>
+                        <td>{formatPrice(item.price5mg) || "-"}</td>
+                        <td>{formatPrice(item.price7_5mg) || "-"}</td>
+                        <td>{formatPrice(item.price10mg) || "-"}</td>
+                        <td>{formatPrice(item.price12_5mg) || "-"}</td>
+                        <td>{formatPrice(item.price15mg) || "-"}</td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{formatPrice(item.price5mg) || "-"}</td>
+                        <td>{formatPrice(item.price10mg) || "-"}</td>
+                      </>
+                    )}
+
                     <td className="table-note">{item.note || "-"}</td>
                     <td>
                       {lastUpdatedText && (
@@ -389,6 +547,22 @@ function PricePage() {
                         </span>
                       )}
                     </td>
+                    <td>
+                      {/* <button
+                        type="button"
+                        className="report-icon-btn"
+                        onClick={() => openReportModal(item)}
+                        title="編輯 / 協助更新此筆資料"
+                      >
+                        ✏️
+                      </button> */}
+                      <FaRegEdit
+                        type="button"
+                        className="report-icon-btn"
+                        onClick={() => openReportModal(item)}
+                        title="編輯 / 協助更新此筆資料"
+                      />
+                    </td>
                   </tr>
                 );
               })}
@@ -396,7 +570,7 @@ function PricePage() {
               {!loading && filteredData.length === 0 && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={totalColumns}
                     style={{ textAlign: "center", padding: "12px" }}
                   >
                     目前沒有符合條件的資料。
@@ -406,6 +580,263 @@ function PricePage() {
             </tbody>
           </table>
         </div>
+
+        {/* 協助更新 Modal */}
+        {reportTarget && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15,23,42,0.45)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 2000,
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: "420px",
+                background: "#ffffff",
+                borderRadius: "16px",
+                padding: "20px",
+                boxShadow: "0 20px 40px rgba(15,23,42,0.3)",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 700,
+                  marginBottom: "8px",
+                  color: "#0f172a",
+                }}
+              >
+                協助更新資料
+              </h2>
+
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "#6b7280",
+                  marginBottom: "12px",
+                  lineHeight: 1.6,
+                }}
+              >
+                謝謝你協助維護本網站的資訊 🙏
+                <br />
+                提交後需等待站長審核，審核通過後才會正式更新到主資料表。
+              </p>
+
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "#6b7280",
+                  marginBottom: "12px",
+                  lineHeight: 1.6,
+                }}
+              >
+                診所：{reportTarget.city} / {reportTarget.district} /{" "}
+                {reportTarget.clinic}
+              </p>
+
+              <form onSubmit={handleSubmitReport}>
+                {/* 地區（選填） */}
+                <div style={{ marginBottom: "12px" }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      color: "#4b5563",
+                      display: "block",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    地區（選填）
+                  </label>
+                  <input
+                    type="text"
+                    value={reportDistrict}
+                    onChange={(e) => setReportDistrict(e.target.value)}
+                    placeholder="例如：信義區、中西區⋯"
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: "12px",
+                    }}
+                  />
+                </div>
+
+                {/* 劑量價格 */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "8px 12px",
+                    marginBottom: "12px",
+                  }}
+                >
+                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                    2.5 mg
+                    <input
+                      type="number"
+                      value={reportPrice2_5}
+                      onChange={(e) => setReportPrice2_5(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "4px 6px",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </label>
+                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                    5 mg
+                    <input
+                      type="number"
+                      value={reportPrice5}
+                      onChange={(e) => setReportPrice5(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "4px 6px",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </label>
+                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                    7.5 mg
+                    <input
+                      type="number"
+                      value={reportPrice7_5}
+                      onChange={(e) => setReportPrice7_5(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "4px 6px",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </label>
+                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                    10 mg
+                    <input
+                      type="number"
+                      value={reportPrice10}
+                      onChange={(e) => setReportPrice10(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "4px 6px",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </label>
+                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                    12.5 mg
+                    <input
+                      type="number"
+                      value={reportPrice12_5}
+                      onChange={(e) => setReportPrice12_5(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "4px 6px",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </label>
+                  <label style={{ fontSize: "12px", color: "#4b5563" }}>
+                    15 mg
+                    <input
+                      type="number"
+                      value={reportPrice15}
+                      onChange={(e) => setReportPrice15(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "4px 6px",
+                        fontSize: "12px",
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {/* 備註 */}
+                <div style={{ marginBottom: "12px" }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      color: "#4b5563",
+                      display: "block",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    備註（選填）
+                  </label>
+                  <textarea
+                    value={reportNote}
+                    onChange={(e) => setReportNote(e.target.value)}
+                    rows={3}
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: "12px",
+                      resize: "vertical",
+                    }}
+                    placeholder="例如：最近調漲、包含掛號費、分次販售等補充資訊⋯"
+                  />
+                </div>
+
+                {/* 錯誤訊息 */}
+                {reportError && (
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "#b91c1c",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {reportError}
+                  </p>
+                )}
+
+                {/* 按鈕區 */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "8px",
+                    marginTop: "8px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={closeReportModal}
+                    style={{
+                      padding: "6px 10px",
+                      fontSize: "13px",
+                      borderRadius: "999px",
+                      border: "1px solid #e5e7eb",
+                      background: "#ffffff",
+                      cursor: reportSubmitting ? "default" : "pointer",
+                    }}
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={reportSubmitting}
+                    style={{
+                      padding: "6px 14px",
+                      fontSize: "13px",
+                      borderRadius: "999px",
+                      border: "1px solid #0f766e",
+                      background: reportSubmitting ? "#9ca3af" : "#0f766e",
+                      color: "#f9fafb",
+                      cursor: reportSubmitting ? "default" : "pointer",
+                    }}
+                  >
+                    {reportSubmitting ? "提交中…" : "提交協助更新"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
