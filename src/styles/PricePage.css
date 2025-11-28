@@ -1,66 +1,333 @@
-.table-city {
+/* ---------------- 共用元件：filter button ---------------- */
+.filter-btn {
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  padding: 6px 10px;
+  font-size: 13px;
+  background: #ffffff;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.filter-btn.active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #f9fafb;
+}
+
+.filter-btn:hover:not(.active) {
+  background: #e5f3f1;
+}
+
+/* ---------------- Search input ---------------- */
+.search-input {
+  padding: 8px;
+  margin-bottom: 20px;
+  max-width: 260px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #cbd5f5;
+  font-size: 14px;
+}
+
+/* ---------------- Warning block ---------------- */
+.warning-block {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 14px;
+  line-height: 1.7;
+  font-weight: 600;
+}
+
+/* ---------------- Responsive table ---------------- */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 16px;
+}
+
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px; /* 避免在手機被壓太窄 */
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.price-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+  padding: 10px 6px;
+  border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
 }
 
-.table-note {
+.price-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  white-space: nowrap; /* 預設都不換行 */
+}
+
+/* 城市 / 類型 / 診所名稱 不換行 */
+.price-table td.col-city,
+.price-table td.col-type,
+.price-table td.col-clinic {
+  white-space: nowrap;
+}
+
+/* 備註欄：桌機顯示完整，允許換行 */
+.price-table td.col-note {
   white-space: normal;
+  text-align: left;
+  max-width: 320px;
+}
+
+/* 備註文字容器 */
+.price-table td.col-note .note-text {
+  font-size: 13px;
   line-height: 1.5;
 }
 
-.table-container {
-  overflow-x: auto;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+.note-icon {
+  font-size: 14px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+@media (max-width: 640px) {
+  .note-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: #0f766e;
+    cursor: pointer;
+    padding: 2px;
+    margin-left: 6px;
+  }
+
+  .note-icon {
+    font-size: 16px;
+  }
 }
 
-th {
-  text-align: left;
-  padding: 8px;
-  font-size: 13px;
-  border-bottom: 1px solid #cbd5e1;
-  white-space: nowrap;
-  background: #e2e8f0;
-}
-
-td {
-  padding: 8px;
-  font-size: 13px;
-  border-bottom: 1px solid #e5e7eb;
-  vertical-align: top;
-}
-
-button.filter-btn {
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid #cbd5f5;
-  background: #ffffff;
-  color: #111827;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-button.filter-btn.active {
-  background: #0f766e;
-  border: 1px solid #0f766e;
-  color: white;
-}
+/* 編輯 icon 按鈕 */
 .report-icon-btn {
   cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
   font-size: 16px;
-  line-height: 1;
-  color: #475569;
-  transition: color 0.2s ease;
+  color: #0f766e;
 }
 
-.report-icon-btn:hover {
-  color: #0f766e;
+/* ---------------- RWD 手機優化 ---------------- */
+@media (max-width: 640px) {
+  .price-table th,
+  .price-table td {
+    padding: 6px 4px;
+    font-size: 13px;
+  }
+
+  .price-table td.col-note {
+    max-width: 220px;
+  }
+
+  /* 手機版：備註預設只顯示 2 行，超過用省略號 */
+  .price-table td.col-note .note-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .price-table td.col-note.note-collapsed .note-text {
+    -webkit-line-clamp: 2; /* 只顯示兩行 */
+  }
+
+  .price-table td.col-note.note-expanded .note-text {
+    -webkit-line-clamp: unset; /* 展開顯示全部 */
+  }
+
+  /* 手機版才顯示「更多 / 收合」按鈕 */
+  .note-toggle {
+    display: inline-block;
+    margin-top: 4px;
+    border: none;
+    background: transparent;
+    color: #0f766e;
+    font-size: 12px;
+    padding: 0;
+    cursor: pointer;
+  }
+}
+
+/* ---------------- Modal 區域 ---------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.modal-text {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.modal-field {
+  margin-bottom: 12px;
+}
+
+.modal-label {
+  font-size: 12px;
+  color: #4b5563;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.modal-textarea {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  resize: vertical;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.modal-error {
+  font-size: 12px;
+  color: #b91c1c;
+  margin-bottom: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-secondary {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.btn-primary {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: 1px solid #0f766e;
+  background: #0f766e;
+  color: #f9fafb;
+  cursor: pointer;
+}
+
+/* 備註欄：桌機顯示完整，允許換行 */
+.price-table td.col-note {
+  white-space: normal;
+  text-align: left;
+  max-width: 320px;
+}
+
+/* 備註文字容器 */
+.price-table td.col-note .note-text {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* 預設（桌機）：不顯示展開 icon */
+.note-toggle {
+  display: none;
+}
+
+/* Chevron icon 大小（共用） */
+.note-icon {
+  font-size: 14px;
+}
+
+/* ---------------- RWD 手機優化 ---------------- */
+@media (max-width: 640px) {
+  .price-table th,
+  .price-table td {
+    padding: 6px 4px;
+    font-size: 13px;
+  }
+
+  .price-table td.col-note {
+    max-width: 220px;
+  }
+
+  /* 手機版：備註預設只顯示 2 行，超過用省略 */
+  .price-table td.col-note .note-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .price-table td.col-note.note-collapsed .note-text {
+    -webkit-line-clamp: 2; /* 只顯示兩行 */
+  }
+
+  .price-table td.col-note.note-expanded .note-text {
+    -webkit-line-clamp: unset; /* 展開顯示全部 */
+  }
+
+  /* 手機版才顯示 Chevron 按鈕 */
+  .note-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    border: none;
+    background: transparent;
+    color: #0f766e;
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  .note-icon {
+    font-size: 16px;
+  }
 }

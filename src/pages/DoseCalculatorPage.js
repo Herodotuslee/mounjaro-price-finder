@@ -85,9 +85,6 @@ function DoseCalculatorPage() {
           border: "1px solid #ccc",
         }}
       />
-      <p style={{ fontSize: 12, color: "#6b7280", marginTop: -10 }}>
-        ※ 每次施打不會超過該劑型標示劑量
-      </p>
 
       {/* 計算按鈕 */}
       <button
