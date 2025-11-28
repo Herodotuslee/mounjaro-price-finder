@@ -1,15 +1,11 @@
-/* 讓城市欄位不換行 */
 .table-city {
   white-space: nowrap;
 }
 
-/* 備註欄位允許換行 */
 .table-note {
   white-space: normal;
   line-height: 1.5;
 }
-
-/* src/styles/table.css */
 
 .table-container {
   overflow-x: auto;
@@ -59,12 +55,12 @@ button.filter-btn.active {
   background: none;
   border: none;
   padding: 0;
-  font-size: 16px; /* icon 大小 */
+  font-size: 16px;
   line-height: 1;
-  color: #475569; /* 灰藍色，低調 */
+  color: #475569;
   transition: color 0.2s ease;
 }
 
 .report-icon-btn:hover {
-  color: #0f766e; /* hover 主綠色 */
+  color: #0f766e;
 }

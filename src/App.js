@@ -4,7 +4,7 @@ import PricePage from "./pages/PricePage";
 import FaqPage from "./pages/FaqPage";
 import HealthPage from "./pages/HealthPage";
 import ReportPriceFormPage from "./pages/ReportPriceFormPage";
-import AdvancedPage from "./pages/AdvancedPage"; // 🆕 新增這行
+import AdvancedPage from "./pages/AdvancedPage";
 import "./styles/navbar.css";
 import LazyPage from "./pages/LazyPage";
 import DoseCalculatorPage from "./pages/DoseCalculatorPage";
@@ -12,7 +12,7 @@ import DoseCalculatorPage from "./pages/DoseCalculatorPage";
 function App() {
   return (
     <div>
-      {/* 🔹 Navigation Bar */}
+      {/* 🔹 Navbar */}
       <nav className="navbar">
         <div className="nav-container">
           <NavLink
@@ -24,10 +24,10 @@ function App() {
               color: "#0f172a",
               transition: "color 0.2s ease",
             }}
-            onMouseEnter={(e) => (e.target.style.color = "#2563eb")}
+            onMouseEnter={(e) => (e.target.style.color = "#0f766e")}
             onMouseLeave={(e) => (e.target.style.color = "#0f172a")}
           >
-            全國猛健樂資訊網
+            台灣猛健樂資訊網
           </NavLink>
 
           <ul className="nav-links">
@@ -55,7 +55,6 @@ function App() {
               </NavLink>
             </li>
             <li className="nav-item-with-tooltip">
-              {/* 🆕 新增進階知識入口 */}
               <NavLink to="/advanced" className="nav-item">
                 進階知識
               </NavLink>
@@ -68,14 +67,11 @@ function App() {
             </li>
 
             <li>
-              {/* 🆕 新增進階知識入口 */}
               <NavLink to="/report" className="nav-item">
                 回報價格
               </NavLink>
             </li>
           </ul>
-
-          {/* ⭐ 右側 icon 區塊 */}
           <div className="nav-actions">
             {/* LINE icon */}
             <a
