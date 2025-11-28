@@ -8,6 +8,7 @@ import AdvancedPage from "./pages/AdvancedPage";
 import "./styles/navbar.css";
 import LazyPage from "./pages/LazyPage";
 import DoseCalculatorPage from "./pages/DoseCalculatorPage";
+import Footer from "./pages/Footer";
 
 function App() {
   return (
@@ -114,6 +115,7 @@ function App() {
         <Route path="/advanced" element={<AdvancedPage />} />
         <Route path="/dose" element={<DoseCalculatorPage />} />
       </Routes>
+      <Footer />
     </div>
   );
 }

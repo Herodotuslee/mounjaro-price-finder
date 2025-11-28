@@ -11,6 +11,7 @@ import {
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import { FaRegEdit, FaChevronUp, FaChevronDown } from "react-icons/fa";
+import PriceReportModal from "../component/PriceReportModal";
 
 // ---------- Helper functions ----------
 const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
@@ -153,7 +154,6 @@ function PricePage() {
   const [reportPrice10, setReportPrice10] = useState("");
   const [reportPrice12_5, setReportPrice12_5] = useState("");
   const [reportPrice15, setReportPrice15] = useState("");
-  const [reportAddress, setReportAddress] = useState("");
   const [reportNote, setReportNote] = useState("");
 
   // 判斷是否為手機寬度（簡單版）
@@ -240,7 +240,6 @@ function PricePage() {
   const openReportModal = (row) => {
     setReportTarget(row);
     setReportError(null);
-    setReportAddress(row.address ?? "");
     setReportDistrict(row.district ?? "");
     setReportPrice2_5(row.price2_5mg ?? "");
     setReportPrice5(row.price5mg ?? "");
@@ -273,15 +272,12 @@ function PricePage() {
         district: reportDistrict || reportTarget.district || null,
         clinic: reportTarget.clinic,
         type: reportTarget.type || "clinic",
-        is_cosmetic: reportTarget.is_cosmetic ?? false,
-        address: reportAddress || reportTarget.address || null,
         price2_5mg: toNullableInt(reportPrice2_5),
         price5mg: toNullableInt(reportPrice5),
         price7_5mg: toNullableInt(reportPrice7_5),
         price10mg: toNullableInt(reportPrice10),
         price12_5mg: toNullableInt(reportPrice12_5),
         price15mg: toNullableInt(reportPrice15),
-
         note: reportNote || null,
         last_updated: new Date().toISOString().slice(0, 10),
       };
@@ -435,12 +431,34 @@ function PricePage() {
                       <div className="clinic-prices">
                         {showAllDoses ? (
                           <div className="dose-grid">
-                            {price2_5 && <span>2.5 mg：{price2_5}</span>}
-                            {price5 && <span>5 mg：{price5}</span>}
-                            {price7_5 && <span>7.5 mg：{price7_5}</span>}
-                            {price10 && <span>10 mg：{price10}</span>}
-                            {price12_5 && <span>12.5 mg：{price12_5}</span>}
-                            {price15 && <span>15 mg：{price15}</span>}
+                            {price2_5 && (
+                              <span className="price-box">
+                                2.5 mg：{price2_5}
+                              </span>
+                            )}
+                            {price5 && (
+                              <span className="price-box">5 mg：{price5}</span>
+                            )}
+                            {price7_5 && (
+                              <span className="price-box">
+                                7.5 mg：{price7_5}
+                              </span>
+                            )}
+                            {price10 && (
+                              <span className="price-box">
+                                10 mg：{price10}
+                              </span>
+                            )}
+                            {price12_5 && (
+                              <span className="price-box">
+                                12.5 mg：{price12_5}
+                              </span>
+                            )}
+                            {price15 && (
+                              <span className="price-box">
+                                15 mg：{price15}
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <>
@@ -607,183 +625,31 @@ function PricePage() {
           </>
         )}
 
-        {/* Donate 區塊 */}
-        <section className="donate-block">
-          <p className="donate-text">
-            這個網站由我自費維護，也靠許多網友一起整理與回報最新價格，是完全鄉民自發維護的資訊平台。
-            <br />
-            如果這些內容有幫助到你，歡迎請我喝杯咖啡，支持我把資料持續整理得更完善！
-          </p>
-
-          <a
-            href="https://buymeacoffee.com/holaalbertc"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="donate-button"
-          >
-            ☕ 請我喝杯咖啡
-          </a>
-        </section>
-
-        {/* 關於本站 */}
-        <section className="about-block">
-          <h2 className="about-title">關於這個網站</h2>
-          <p className="about-text">
-            一開始自己在找猛健樂價格時，發現資訊非常不透明， 我曾經為 5 mg 花了
-            15000 元，甚至看到不少人為不必要的智商稅商品組合一隻5mg付到 32000
-            元。因此決定把全台資訊集中整理，讓大家能更快速找到合理的價格與適合的醫師。
-            這裡的內容完全民間自發整理，不提供醫療診斷；
-            所有決策仍需與合格醫師討論。希望這份整理能讓更多人節省時間與金錢，
-            也減少資訊不對稱造成的花費負擔。
-          </p>
-        </section>
-
-        {/* 協助更新 Modal */}
+        {/* 協助更新 Modal（抽成獨立元件） */}
         {reportTarget && (
-          <div className="modal-backdrop">
-            <div className="modal-card">
-              <h2 className="modal-title">協助更新資料</h2>
-
-              <p className="modal-text">
-                謝謝你協助維護本網站的資訊 🙏
-                <br />
-                提交後需等待站長審核，審核通過後才會正式更新到主資料表。
-              </p>
-
-              <p className="modal-text">
-                診所：{reportTarget.city} / {reportTarget.district} /{" "}
-                {reportTarget.clinic}
-              </p>
-
-              <form onSubmit={handleSubmitReport}>
-                {/* 地區 + 地址：兩欄排版 */}
-                <div className="modal-row-2">
-                  <div className="modal-field">
-                    <label className="modal-label">地區（選填）</label>
-                    <input
-                      type="text"
-                      value={reportDistrict}
-                      onChange={(e) => setReportDistrict(e.target.value)}
-                      placeholder="例如：信義區、中西區⋯"
-                      className="modal-input"
-                    />
-                  </div>
-
-                  <div className="modal-field">
-                    <label className="modal-label">地址（可略）</label>
-                    <input
-                      type="text"
-                      value={reportAddress}
-                      onChange={(e) => setReportAddress(e.target.value)}
-                      className="modal-input"
-                    />
-                  </div>
-                </div>
-
-                {/* 劑量區：2 欄 grid，視覺上比較有秩序 */}
-                <div className="modal-grid">
-                  <div className="modal-field">
-                    <label className="modal-label">
-                      2.5 mg
-                      <input
-                        type="number"
-                        value={reportPrice2_5}
-                        onChange={(e) => setReportPrice2_5(e.target.value)}
-                        className="modal-input"
-                      />
-                    </label>
-                  </div>
-                  <div className="modal-field">
-                    <label className="modal-label">
-                      5 mg
-                      <input
-                        type="number"
-                        value={reportPrice5}
-                        onChange={(e) => setReportPrice5(e.target.value)}
-                        className="modal-input"
-                      />
-                    </label>
-                  </div>
-                  <div className="modal-field">
-                    <label className="modal-label">
-                      7.5 mg
-                      <input
-                        type="number"
-                        value={reportPrice7_5}
-                        onChange={(e) => setReportPrice7_5(e.target.value)}
-                        className="modal-input"
-                      />
-                    </label>
-                  </div>
-                  <div className="modal-field">
-                    <label className="modal-label">
-                      10 mg
-                      <input
-                        type="number"
-                        value={reportPrice10}
-                        onChange={(e) => setReportPrice10(e.target.value)}
-                        className="modal-input"
-                      />
-                    </label>
-                  </div>
-                  <div className="modal-field">
-                    <label className="modal-label">
-                      12.5 mg
-                      <input
-                        type="number"
-                        value={reportPrice12_5}
-                        onChange={(e) => setReportPrice12_5(e.target.value)}
-                        className="modal-input"
-                      />
-                    </label>
-                  </div>
-                  <div className="modal-field">
-                    <label className="modal-label">
-                      15 mg
-                      <input
-                        type="number"
-                        value={reportPrice15}
-                        onChange={(e) => setReportPrice15(e.target.value)}
-                        className="modal-input"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                {/* 備註 */}
-                <div className="modal-field">
-                  <label className="modal-label">備註（選填）</label>
-                  <textarea
-                    value={reportNote}
-                    onChange={(e) => setReportNote(e.target.value)}
-                    rows={3}
-                    className="modal-textarea"
-                    placeholder="例如：最近調漲、包含掛號費、分次販售等補充資訊⋯"
-                  />
-                </div>
-
-                {reportError && <p className="modal-error">{reportError}</p>}
-
-                <div className="modal-actions">
-                  <button
-                    type="button"
-                    onClick={closeReportModal}
-                    className="btn-secondary"
-                    disabled={reportSubmitting}
-                  >
-                    取消
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={reportSubmitting}
-                    className="btn-primary"
-                  >
-                    {reportSubmitting ? "提交中…" : "提交協助更新"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+          <PriceReportModal
+            target={reportTarget}
+            reportSubmitting={reportSubmitting}
+            reportError={reportError}
+            onClose={closeReportModal}
+            handleSubmitReport={handleSubmitReport}
+            reportDistrict={reportDistrict}
+            setReportDistrict={setReportDistrict}
+            reportPrice2_5={reportPrice2_5}
+            setReportPrice2_5={setReportPrice2_5}
+            reportPrice5={reportPrice5}
+            setReportPrice5={setReportPrice5}
+            reportPrice7_5={reportPrice7_5}
+            setReportPrice7_5={setReportPrice7_5}
+            reportPrice10={reportPrice10}
+            setReportPrice10={setReportPrice10}
+            reportPrice12_5={reportPrice12_5}
+            setReportPrice12_5={setReportPrice12_5}
+            reportPrice15={reportPrice15}
+            setReportPrice15={setReportPrice15}
+            reportNote={reportNote}
+            setReportNote={setReportNote}
+          />
         )}
       </div>
     </div>

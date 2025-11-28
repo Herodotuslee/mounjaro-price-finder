@@ -354,8 +354,7 @@
   color: #4b5563;
   line-height: 1.7;
 }
-
-/* ---------------- Modal ---------------- */
+/* 協助更新 Modal 背景 */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -363,83 +362,109 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 50;
 }
 
+/* Modal 卡片 */
 .modal-card {
-  width: 100%;
-  max-width: 420px;
   background: #ffffff;
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3);
-}
-
-.modal-title {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.modal-text {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 12px;
-  line-height: 1.6;
-}
-
-.modal-field {
-  margin-bottom: 12px;
-}
-
-.modal-label {
-  font-size: 12px;
-  color: #4b5563;
-  margin-bottom: 4px;
-}
-
-.modal-input,
-.modal-textarea {
+  max-width: 520px;
   width: 100%;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 12px;
-  resize: vertical;
+  padding: 20px 18px 18px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
 }
 
+/* 兩欄地區＋地址 */
+.modal-row-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-row-2 .modal-field {
+  flex: 1 1 0;
+}
+
+/* 劑量說明 */
+.modal-dose-header {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.modal-dose-header .modal-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* 劑量區：兩欄 grid */
 .modal-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 12px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin-bottom: 16px;
 }
 
-.modal-error {
-  color: #b91c1c;
-  font-size: 12px;
+@media (max-width: 640px) {
+  .modal-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.modal-actions {
+/* 每一格：上 label，下 input */
+.modal-field {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.btn-secondary {
-  padding: 6px 10px;
+/* 劑量小卡片 */
+.dose-field {
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 12px;
+}
+
+/* label & input 共用樣式 */
+.modal-label {
   font-size: 13px;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
+  color: #475569;
+  font-weight: 600;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
   background: #ffffff;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.btn-primary {
-  padding: 6px 14px;
-  font-size: 13px;
-  border-radius: 999px;
-  background: #0f766e;
-  color: #ffffff;
-  border: 1px solid #0f766e;
+.modal-input:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
+}
+
+.modal-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 72px;
+  box-sizing: border-box;
+}
+
+.modal-textarea:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
 }
 
 /* ---------------- RWD ---------------- */
@@ -457,4 +482,56 @@
     font-size: 13px;
     padding: 6px 4px;
   }
+}
+
+/* 取消按鈕（次要） */
+.btn-secondary {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-secondary:hover:enabled {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+/* 送出按鈕（主要） */
+.btn-primary {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid #0f766e;
+  background: #0f766e;
+  color: #f9fafb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.25);
+}
+
+.btn-primary:hover:enabled {
+  background: #0d665f;
+  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.32);
+  transform: translateY(-0.5px);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+.modal-actions {
+  margin-top: 16px; /* ⭐ 跟上方欄位拉開距離 */
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px; /* ⭐ 兩顆按鈕之間的距離 */
 }
