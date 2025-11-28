@@ -35,10 +35,13 @@ function App() {
                 價格資訊
               </NavLink>
             </li>
-            <li>
+            <li className="nav-item-with-tooltip">
               <NavLink to="/lazy" className="nav-item">
                 懶人包
               </NavLink>
+              <div className="nav-tooltip">
+                最精簡的懶人包！搞懂並且都做到，你就是猛健樂使用者的 Pr99了！
+              </div>
             </li>
             <li>
               <NavLink to="/faq" className="nav-item">
@@ -50,11 +53,12 @@ function App() {
                 健康知識
               </NavLink>
             </li>
-            <li>
+            <li className="nav-item-with-tooltip">
               {/* 🆕 新增進階知識入口 */}
               <NavLink to="/advanced" className="nav-item">
                 進階知識
               </NavLink>
+              <div className="nav-tooltip">對深入知識有興趣的人可參考！</div>
             </li>
             <li>
               {/* 🆕 新增進階知識入口 */}

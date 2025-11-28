@@ -78,8 +78,6 @@ function ReportPriceFormPage() {
       district: form.district.trim() || null,
       clinic: form.clinic.trim(),
       type: form.type || null,
-      // 是否為醫美：用類型自動判斷
-      is_cosmetic: form.type === "medical_aesthetic",
       price2_5mg: toNumberOrNull(form.price2_5mg),
       price5mg: toNumberOrNull(form.price5mg),
       price7_5mg: toNumberOrNull(form.price7_5mg),
@@ -154,7 +152,7 @@ function ReportPriceFormPage() {
             color: "#64748b",
           }}
         >
-          希望健康的體態是每個台灣人的權利。
+          希望健康的體態是每個台灣人都能追求的權利，不再是遙不可及。
         </p>
 
         {/* 說明文字 */}
@@ -299,35 +297,49 @@ function ReportPriceFormPage() {
             />
           </div>
 
-          {/* 類型 */}
-          <div style={{ marginBottom: "12px" }}>
+          {/* 類型：改成子彈（radio）選擇 */}
+          <div style={{ marginBottom: "16px" }}>
             <label
               style={{
                 display: "block",
                 fontSize: "14px",
-                marginBottom: "4px",
+                marginBottom: "6px",
                 color: "#0f172a",
               }}
             >
               類型
             </label>
-            <select
-              value={form.type}
-              onChange={handleChange("type")}
+            <div
               style={{
-                width: "100%",
-                padding: "8px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px 16px",
                 fontSize: "14px",
-                borderRadius: "8px",
-                border: "1px solid #e5e7eb",
+                color: "#0f172a",
               }}
             >
               {TYPE_OPTIONS.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
+                <label
+                  key={t.value}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="type"
+                    value={t.value}
+                    checked={form.type === t.value}
+                    onChange={handleChange("type")}
+                    style={{ cursor: "pointer" }}
+                  />
+                  <span>{t.label}</span>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* 價格區塊 */}
@@ -419,6 +431,8 @@ function ReportPriceFormPage() {
               }}
             />
           </div>
+
+          {/* 送出按鈕 */}
           <button
             type="submit"
             disabled={submitting}
