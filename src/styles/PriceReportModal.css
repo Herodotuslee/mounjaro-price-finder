@@ -157,13 +157,10 @@
   font-size: 13px;
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
 }
 
 .btn-primary:hover:enabled {
   background: #0d665f;
-  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.3);
   transform: translateY(-0.5px);
 }
 

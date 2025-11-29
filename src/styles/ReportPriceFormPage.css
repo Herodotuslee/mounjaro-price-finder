@@ -211,13 +211,11 @@
   background: #0f766e;
   color: #ffffff;
   transition: background 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
-  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.25);
 }
 
 .report-submit-btn:hover:enabled {
   background: #0d5f59;
   transform: translateY(-1px);
-  box-shadow: 0 12px 26px rgba(15, 118, 110, 0.32);
 }
 
 .report-submit-btn:disabled {

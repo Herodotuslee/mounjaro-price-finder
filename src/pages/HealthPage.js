@@ -38,11 +38,6 @@ function HealthPage() {
         本頁內容為一般健康資訊，並不構成醫療或營養處方。
       </div>
 
-      <p style={{ fontSize: 13, color: "#4b5563", marginBottom: 16 }}>
-        📌 下面每一點都很重要，能做到當然最好；沒辦法每一條都達成也沒關係，
-        可以依照重要程度慢慢調整。
-      </p>
-
       {healthSections.map((section) => (
         <div key={section.title} style={{ marginBottom: 24 }}>
           <h2

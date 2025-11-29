@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import { CITY_LABELS } from "../data/prices";
-import "../styles/ReportPriceFormPage.css"; // ⭐ 新增：這頁專用樣式
+import "../styles/ReportPriceFormPage.css";
 
 const INITIAL_FORM = {
   city: "",
@@ -29,12 +29,12 @@ const TYPE_OPTIONS = [
 ];
 
 const PRICE_FIELDS = [
-  { name: "price2_5mg", label: "2.5 mg", placeholder: "例如 8000" },
-  { name: "price5mg", label: "5 mg", placeholder: "例如 15000" },
-  { name: "price7_5mg", label: "7.5 mg", placeholder: "可留白" },
-  { name: "price10mg", label: "10 mg", placeholder: "可留白" },
-  { name: "price12_5mg", label: "12.5 mg", placeholder: "可留白" },
-  { name: "price15mg", label: "15 mg", placeholder: "可留白" },
+  { name: "price2_5mg", label: "2.5 mg" },
+  { name: "price5mg", label: "5 mg" },
+  { name: "price7_5mg", label: "7.5 mg" },
+  { name: "price10mg", label: "10 mg" },
+  { name: "price12_5mg", label: "12.5 mg" },
+  { name: "price15mg", label: "15 mg" },
 ];
 
 function ReportPriceFormPage() {
