@@ -11,7 +11,7 @@ import {
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import { FaRegEdit, FaChevronUp, FaChevronDown } from "react-icons/fa";
-import PriceReportModal from "../component/PriceReportModal";
+import PriceReportModal from "../components/PriceReportModal";
 
 // ---------- Helper functions ----------
 const normalize = (value) => (value ?? "").toString().trim().toLowerCase();

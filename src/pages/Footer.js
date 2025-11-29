@@ -31,9 +31,9 @@ function Footer() {
         <div className="footer-main">
           <h2 className="footer-title">關於這個網站</h2>
           <p className="footer-text">
-            一開始自己在找猛健樂價格時，發現資訊非常不透明。 我第一次買 5 mg
-            猛健樂花了 15000 元，也聽過朋友因為智商稅組合， 一支 5 mg 付到 32000
-            元。於是決定把全台診所與醫療院所的價格集中整理起來，
+            我在找猛健樂價格時發現資訊非常不透明。 第一次買 5 mg
+            猛健樂花了15000元，也聽過朋友去醫美買了一支 5 mg+智商稅產品 付到
+            32000 元。於是決定把全台診所與醫療院所的價格集中整理起來，
             讓大家可以更快找到合理的價格與適合的醫師。
           </p>
           <p className="footer-text footer-text-sub">
@@ -45,7 +45,7 @@ function Footer() {
 
       <div className="footer-bottom">
         <span className="footer-bottom-text">
-          © {new Date().getFullYear()} 全國猛健樂資訊網 。
+          © {new Date().getFullYear()} 台灣猛健樂資訊網 。
         </span>
       </div>
     </footer>
