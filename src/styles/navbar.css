@@ -1,5 +1,3 @@
-/* navbar.css */
-
 /* ---------- Shell ---------- */
 .navbar {
   background: #ffffff;
@@ -13,6 +11,13 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* Header row: brand + hamburger (on mobile) */
+.nav-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 /* ---------- Brand ---------- */
@@ -29,7 +34,7 @@
   color: #0f766e;
 }
 
-/* ---------- Main area (links + actions) ---------- */
+/* ---------- Main area (links) ---------- */
 .nav-main {
   display: flex;
   align-items: center;
@@ -75,7 +80,7 @@
   white-space: nowrap;
 }
 
-/* LINE simple style */
+/* LINE */
 .nav-line-link {
   display: inline-flex;
   align-items: center;
@@ -100,7 +105,7 @@
   margin-right: 6px;
 }
 
-/* Donate simple icon */
+/* Donate */
 .nav-coffee-link {
   display: inline-flex;
   align-items: center;
@@ -121,7 +126,42 @@
   object-fit: contain;
 }
 
-/* ---------- Mobile layout: stack nav, actions float bottom-right ---------- */
+/* ---------- Hamburger base (hidden on desktop) ---------- */
+.nav-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.nav-toggle-bar {
+  display: block; /* 💡 這行很關鍵：把線條畫出來 */
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: #4b5563;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.nav-toggle-bar + .nav-toggle-bar {
+  margin-top: 4px;
+}
+
+/* 當 menu 打開時，變成 X */
+.nav-toggle-bar.open:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.nav-toggle-bar.open:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle-bar.open:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* ---------- Mobile layout: hamburger + dropdown, actions float ---------- */
 @media (max-width: 640px) {
   .nav-container {
     padding: 10px 12px;
@@ -134,24 +174,42 @@
     font-size: 20px;
   }
 
+  .nav-header-row {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* show hamburger on mobile */
+  .nav-toggle {
+    display: block;
+  }
+
+  /* collapse menu by default */
   .nav-main {
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    display: none;
+    margin-left: 0;
+  }
+
+  .nav-main.open {
+    display: flex;
   }
 
   .nav-links {
     width: 100%;
-    flex-wrap: wrap;
-    gap: 8px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 
   .nav-item {
     font-size: 13px;
   }
 
-  /* Float LINE + coffee at bottom-right, but smaller & subtle */
+  /* Float LINE + coffee at bottom-right */
   .nav-actions {
     position: fixed;
     right: 12px;

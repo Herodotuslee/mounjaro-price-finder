@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import LoadingIndicator from "../components/LoadingIndicator";
-import useIsMobile from "../hooks/useIsMobile"; // 🆕 import
+import useIsMobile from "../hooks/useIsMobile";
 
 function ThreadsPage() {
   const [posts, setPosts] = useState([]);
@@ -12,7 +12,7 @@ function ThreadsPage() {
   const [selectedTag, setSelectedTag] = useState(null);
 
   const navigate = useNavigate();
-  const isMobile = useIsMobile(640); // 🆕 detect mobile
+  const isMobile = useIsMobile(640);
 
   // Load articles from Supabase
   useEffect(() => {
@@ -59,7 +59,7 @@ function ThreadsPage() {
       ? postsWithTags
       : postsWithTags.filter((post) => post.tags.includes(selectedTag));
 
-  // ---------- Shared page styles (responsive tweaks) ----------
+  // ---------- Shared page styles (responsive) ----------
   const pageRootStyle = {
     padding: isMobile ? 16 : 20,
     maxWidth: 960,
@@ -82,7 +82,6 @@ function ThreadsPage() {
     border: "1px solid #e5e7eb",
   };
 
-  // pills smaller on mobile
   const tagChipBaseStyle = {
     borderRadius: 999,
     fontSize: isMobile ? 11 : 12,
@@ -92,7 +91,7 @@ function ThreadsPage() {
   };
 
   const smallPillButtonBase = {
-    fontSize: isMobile ? 12 : 12,
+    fontSize: 12,
     padding: isMobile ? "4px 8px" : "4px 10px",
     borderRadius: 6,
     border: "1px solid #d1d5db",
@@ -133,7 +132,6 @@ function ThreadsPage() {
               flexWrap: "wrap",
             }}
           >
-            {/* Advanced pharmacology */}
             <button
               type="button"
               onClick={() => navigate("/advanced")}
@@ -152,7 +150,6 @@ function ThreadsPage() {
               進階藥理知識
             </button>
 
-            {/* Notion nutrition notes */}
             <a
               href="https://sunny-hourglass-05c.notion.site/2ba7da0c290680248b66d644b0d9d910"
               target="_blank"
@@ -179,8 +176,8 @@ function ThreadsPage() {
         </p>
       </header>
 
-      {/* Tag filters */}
-      {allTags.length > 0 && (
+      {/* Tag filters – hidden on mobile */}
+      {!isMobile && allTags.length > 0 && (
         <div style={tagFilterContainerStyle}>
           <div
             style={{
@@ -196,7 +193,7 @@ function ThreadsPage() {
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: isMobile ? 6 : 8, // 🆕 tighter gap on mobile
+              gap: 8,
             }}
           >
             {/* "All" tag */}
@@ -299,6 +296,34 @@ function ThreadsPage() {
                     {post.category}
                   </span>
                 )}
+
+                {/* Green tag chips under title, always visible */}
+                {post.tags.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: 4,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 4,
+                    }}
+                  >
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          display: "inline-block",
+                          fontSize: 11,
+                          padding: "2px 8px",
+                          background: "#ecfdf5",
+                          color: "#047857",
+                          borderRadius: 999,
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <span
@@ -349,28 +374,6 @@ function ThreadsPage() {
                   >
                     {post.description}
                   </p>
-                )}
-
-                {post.tags.length > 0 && (
-                  <div style={{ marginBottom: 10 }}>
-                    {post.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        style={{
-                          display: "inline-block",
-                          fontSize: 12,
-                          padding: "2px 8px",
-                          background: "#ecfdf5",
-                          color: "#047857",
-                          borderRadius: 999,
-                          marginRight: 6,
-                          marginBottom: 4,
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
                 )}
 
                 {post.url && (

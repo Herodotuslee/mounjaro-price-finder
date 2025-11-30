@@ -1,7 +1,6 @@
 // src/pages/PricePage.js
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import "../styles/PricePage.css";
 import { TYPE_LABELS, TYPES } from "../data/prices";
 import texts from "../data/texts.json";

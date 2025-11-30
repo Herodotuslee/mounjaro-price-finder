@@ -12,11 +12,22 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        {/* Brand + hamburger row */}
         <div className="nav-header-row">
           <NavLink to="/" className="nav-brand" onClick={closeMenu}>
             台灣猛健樂資訊網
           </NavLink>
+
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-label="Toggle navigation menu"
+            onClick={toggleMenu}
+          >
+            <span className={`nav-toggle-bar ${isMenuOpen ? "open" : ""}`} />
+            <span className={`nav-toggle-bar ${isMenuOpen ? "open" : ""}`} />
+            <span className={`nav-toggle-bar ${isMenuOpen ? "open" : ""}`} />
+          </button>
         </div>
 
         {/* Main links */}
@@ -29,7 +40,7 @@ function Navbar() {
             </li>
             <li>
               <NavLink to="/lazy" className="nav-item" onClick={closeMenu}>
-                懶人包
+                簡易攻略
               </NavLink>
             </li>
             <li>
@@ -39,7 +50,7 @@ function Navbar() {
             </li>
             <li>
               <NavLink to="/health" className="nav-item" onClick={closeMenu}>
-                健康知識
+                健康任務
               </NavLink>
             </li>
             <li>
@@ -60,7 +71,7 @@ function Navbar() {
           </ul>
         </div>
 
-        {/* LINE + Donate (desktop 右側 / mobile 右下角浮動) */}
+        {/* LINE + Donate (desktop right / mobile bottom-right floating) */}
         <div className="nav-actions">
           <a
             href="https://line.me/ti/g2/14wNaS4K1nmA7ytMa8pgzTLuslICubxDFVdjuQ"
