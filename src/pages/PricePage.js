@@ -1,148 +1,40 @@
 // src/pages/PricePage.js
+
 import React, { useEffect, useMemo, useState } from "react";
 import "../styles/PricePage.css";
-import {
-  CITY_LABELS,
-  TYPE_LABELS,
-  TYPES,
-  CITY_KEYWORDS,
-  TYPE_KEYWORDS,
-} from "../data/prices";
+import { TYPE_LABELS, TYPES } from "../data/prices";
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
-import { FaRegEdit, FaChevronUp, FaChevronDown } from "react-icons/fa";
 import PriceReportModal from "../components/PriceReportModal";
+import PriceTable from "../components/PriceTable";
+import PriceCardList from "../components/PriceCardList";
+import useIsMobile from "../hooks/useIsMobile.js";
+import {
+  cityMatchesSelected,
+  typeMatchesSelected,
+  matchesKeyword,
+  toNullableInt,
+} from "../utils/priceHelpers";
 
-// ---------- Helper functions ----------
-const normalize = (value) => (value ?? "").toString().trim().toLowerCase();
-
-// 城市篩選：支援關鍵字 mapping
-const cityMatchesSelected = (rowCityRaw, selectedCityValue) => {
-  if (selectedCityValue === "all") return true;
-
-  const nRow = normalize(rowCityRaw);
-  const nSelected = normalize(selectedCityValue);
-  if (nRow === nSelected) return true;
-
-  const keywordsForSelected = CITY_KEYWORDS[selectedCityValue] || [];
-  const normalizedKeywords = keywordsForSelected.map(normalize);
-  return normalizedKeywords.includes(nRow);
-};
-
-// 類型篩選：支援 mapping
-const typeMatchesSelected = (rowTypeRaw, selectedTypeValue) => {
-  if (selectedTypeValue === "all") return true;
-
-  const nRow = normalize(rowTypeRaw || "clinic");
-  const nSelected = normalize(selectedTypeValue);
-  if (nRow === nSelected) return true;
-
-  const keywordsForSelected = TYPE_KEYWORDS[selectedTypeValue] || [];
-  const normalizedKeywords = keywordsForSelected.map(normalize);
-  return normalizedKeywords.includes(nRow);
-};
-
-// 將 raw type normalize 成 canonical type code
-const getCanonicalTypeCode = (rowTypeRaw) => {
-  const n = normalize(rowTypeRaw || "clinic");
-  if (TYPE_LABELS[n]) return n;
-
-  for (const [typeCode, keywords] of Object.entries(TYPE_KEYWORDS)) {
-    const normalizedKeywords = keywords.map(normalize);
-    if (normalizedKeywords.includes(n)) return typeCode;
-  }
-
-  return "clinic";
-};
-
-// 建立關鍵字 variants（城市/類型 alias）
-const buildKeywordVariants = (kwRaw) => {
-  const kw = normalize(kwRaw);
-  if (!kw) return [];
-  const variants = new Set([kw]);
-
-  Object.entries(CITY_KEYWORDS).forEach(([cityCode, keywords]) => {
-    const normalizedKeywords = keywords.map(normalize);
-    if (normalizedKeywords.includes(kw)) {
-      normalizedKeywords.forEach((k) => variants.add(k));
-      variants.add(normalize(cityCode));
-    }
-  });
-
-  Object.entries(TYPE_KEYWORDS).forEach(([typeCode, keywords]) => {
-    const normalizedKeywords = keywords.map(normalize);
-    if (normalizedKeywords.includes(kw)) {
-      normalizedKeywords.forEach((k) => variants.add(k));
-      variants.add(normalize(typeCode));
-    }
-  });
-
-  return Array.from(variants);
-};
-
-// 文字搜尋
-const matchesKeyword = (row, kwRaw) => {
-  const variants = buildKeywordVariants(kwRaw);
-  if (variants.length === 0) return true;
-
-  const typeCode = getCanonicalTypeCode(row.type);
-  const cityCode = row.city || "";
-  const cityLabel = CITY_LABELS[cityCode] || "";
-  const typeLabel = TYPE_LABELS[typeCode] || "";
-
-  const fields = [
-    row.clinic,
-    row.district,
-    cityCode,
-    cityLabel,
-    typeCode,
-    typeLabel,
-  ];
-
-  const normalizedFields = fields.filter(Boolean).map((v) => normalize(v));
-  return variants.some((kw) =>
-    normalizedFields.some((field) => field.includes(kw))
-  );
-};
-
-const formatPrice = (value) => {
-  if (value === null || value === undefined || value === 0) return "";
-  return value;
-};
-
-const formatLastUpdated = (lastUpdatedRaw) => {
-  if (!lastUpdatedRaw) return "";
-  const d = new Date(lastUpdatedRaw);
-  if (Number.isNaN(d.getTime())) return "";
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}/${m}/${day}`;
-};
-
-const toNullableInt = (value) => {
-  if (value === "" || value === null || value === undefined) return null;
-  const n = Number(value);
-  return Number.isNaN(n) ? null : n;
-};
-
-// ---------- Component 本體 ----------
+// ---------- Component ----------
 function PricePage() {
+  // Filters
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [keyword, setKeyword] = useState("");
 
+  // Data
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 劑量顯示：只看 5/10 或全部
+  // Dose display mode: only 5/10 mg vs all doses
   const [showAllDoses, setShowAllDoses] = useState(false);
 
-  // 手機版 & table：控制哪一筆備註展開
+  // Desktop: which note row is expanded
   const [expandedNoteId, setExpandedNoteId] = useState(null);
 
-  // 協助更新 Modal 狀態
+  // Report modal state
   const [reportTarget, setReportTarget] = useState(null);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportError, setReportError] = useState(null);
@@ -156,21 +48,10 @@ function PricePage() {
   const [reportPrice15, setReportPrice15] = useState("");
   const [reportNote, setReportNote] = useState("");
 
-  // 判斷是否為手機寬度（簡單版）
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth <= 640 : false
-  );
+  // Simple mobile width detection
+  const isMobile = useIsMobile(640);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (typeof window === "undefined") return;
-      setIsMobile(window.innerWidth <= 640);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // 載入 Supabase 資料
+  // Load data from Supabase once on mount
   useEffect(() => {
     async function fetchData() {
       try {
@@ -192,10 +73,9 @@ function PricePage() {
         }
 
         const data = await res.json();
-        console.log("✔ Supabase 回傳 rows：", data);
         setRows(data || []);
       } catch (err) {
-        console.error("❌ 載入 Supabase 價格資料失敗:", err);
+        console.error("Failed to load price data from Supabase:", err);
         setError("載入資料時發生問題，請稍後再試。");
       } finally {
         setLoading(false);
@@ -205,7 +85,7 @@ function PricePage() {
     fetchData();
   }, []);
 
-  // 城市選項（自動從資料抓）
+  // Build city filter options from data itself
   const cityOptions = useMemo(() => {
     const uniqueCities = Array.from(
       new Set(rows.map((r) => r.city).filter(Boolean))
@@ -213,30 +93,19 @@ function PricePage() {
     return ["all", ...uniqueCities];
   }, [rows]);
 
-  // 篩選 + 搜尋
-  const filteredData = useMemo(() => {
-    const result = rows.filter((row) => {
-      const rowTypeRaw = row.type;
-      const cityOk = cityMatchesSelected(row.city, selectedCity);
-      const typeOk = typeMatchesSelected(rowTypeRaw, selectedType);
-      const kwOk = matchesKeyword(row, keyword);
-      return cityOk && typeOk && kwOk;
-    });
+  // Apply filters + keyword search
+  const filteredData = useMemo(
+    () =>
+      rows.filter((row) => {
+        const cityOk = cityMatchesSelected(row.city, selectedCity);
+        const typeOk = typeMatchesSelected(row.type, selectedType);
+        const kwOk = matchesKeyword(row, keyword);
+        return cityOk && typeOk && kwOk;
+      }),
+    [rows, selectedCity, selectedType, keyword]
+  );
 
-    console.log("📌 filter 狀態：", {
-      selectedCity,
-      selectedType,
-      keyword,
-      totalRows: rows.length,
-      filteredRows: result.length,
-    });
-
-    return result;
-  }, [rows, selectedCity, selectedType, keyword]);
-
-  const totalColumns = showAllDoses ? 13 : 9;
-
-  // 開啟協助更新 modal
+  // Open report modal and prefill fields
   const openReportModal = (row) => {
     setReportTarget(row);
     setReportError(null);
@@ -256,7 +125,7 @@ function PricePage() {
     setReportSubmitting(false);
   };
 
-  // 提交協助更新
+  // Submit report to mounjaro_reports
   const handleSubmitReport = async (e) => {
     e.preventDefault();
     if (!reportTarget) return;
@@ -301,7 +170,7 @@ function PricePage() {
       alert("已送出協助更新，感謝你幫忙維護資訊！");
       closeReportModal();
     } catch (err) {
-      console.error("❌ 協助更新送出失敗：", err);
+      console.error("Failed to submit price update report:", err);
       setReportError("送出失敗，請稍後再試。");
     } finally {
       setReportSubmitting(false);
@@ -311,7 +180,7 @@ function PricePage() {
   return (
     <div className="price-page-root">
       <div className="price-page-inner">
-        {/* 頁首 */}
+        {/* Header */}
         <header className="page-header">
           <h1 className="page-title">全國猛健樂價格整理</h1>
           <p className="page-subtitle">
@@ -319,15 +188,15 @@ function PricePage() {
           </p>
         </header>
 
-        {/* 主要 disclaimer */}
-        <div className="disclaimer-block">⚠️ {texts.disclaimer}</div>
+        {/* Main disclaimer */}
+        <div className="info-banner warning-block">⚠️ {texts.disclaimer}</div>
 
         {loading && <p className="status-text">正在載入最新價格資料⋯⋯</p>}
         {error && <p className="status-text error">{error}</p>}
 
-        {/* Filter 區域（卡片） */}
+        {/* Filters */}
         <section className="control-card">
-          {/* 城市 filter */}
+          {/* City filter */}
           <div className="filter-group">
             {cityOptions.map((c) => (
               <button
@@ -335,12 +204,12 @@ function PricePage() {
                 onClick={() => setSelectedCity(c)}
                 className={`filter-btn ${c === selectedCity ? "active" : ""}`}
               >
-                {c === "all" ? "全部城市" : CITY_LABELS[c] || c}
+                {c === "all" ? "全部城市" : c}
               </button>
             ))}
           </div>
 
-          {/* 類型 filter */}
+          {/* Type filter */}
           <div className="filter-group">
             <button
               type="button"
@@ -360,7 +229,7 @@ function PricePage() {
             ))}
           </div>
 
-          {/* 劑量顯示模式切換 */}
+          {/* Dose display mode */}
           <div className="filter-group">
             <button
               type="button"
@@ -378,7 +247,7 @@ function PricePage() {
             </button>
           </div>
 
-          {/* 類型警語 */}
+          {/* Type warnings */}
           {selectedType === "pharmacy" && (
             <div className="warning-block">{texts.pharmacyWarning}</div>
           )}
@@ -386,7 +255,7 @@ function PricePage() {
             <div className="warning-block">{texts.hospitalWarning}</div>
           )}
 
-          {/* 搜尋欄位 */}
+          {/* Keyword search */}
           <input
             placeholder="搜尋診所 / 地區 / 城市 / 類型"
             value={keyword}
@@ -395,237 +264,28 @@ function PricePage() {
           />
         </section>
 
-        {/* 結果區：手機用 card，桌機用表格 */}
+        {/* Result area */}
         {!loading && !error && (
           <>
             {isMobile ? (
-              <section className="card-list">
-                {filteredData.map((item, index) => {
-                  const typeCode = getCanonicalTypeCode(item.type);
-                  const note = item.note || "";
-                  const price2_5 = formatPrice(item.price2_5mg);
-                  const price5 = formatPrice(item.price5mg);
-                  const price7_5 = formatPrice(item.price7_5mg);
-                  const price10 = formatPrice(item.price10mg);
-                  const price12_5 = formatPrice(item.price12_5mg);
-                  const price15 = formatPrice(item.price15mg);
-
-                  return (
-                    <article
-                      key={`${item.id}-${index}-card`}
-                      className="clinic-card"
-                    >
-                      <div className="clinic-card-header">
-                        <div className="clinic-name">
-                          {item.clinic || "未命名診所"}
-                        </div>
-                        <div className="clinic-meta">
-                          <span>
-                            {CITY_LABELS[item.city] || item.city || "-"}
-                          </span>
-                          {item.district && <span> · {item.district}</span>}
-                          <span> · {TYPE_LABELS[typeCode] || "診所"}</span>
-                        </div>
-                      </div>
-
-                      <div className="clinic-prices">
-                        {showAllDoses ? (
-                          <div className="dose-grid">
-                            {price2_5 && (
-                              <span className="price-box">
-                                2.5 mg：{price2_5}
-                              </span>
-                            )}
-                            {price5 && (
-                              <span className="price-box">5 mg：{price5}</span>
-                            )}
-                            {price7_5 && (
-                              <span className="price-box">
-                                7.5 mg：{price7_5}
-                              </span>
-                            )}
-                            {price10 && (
-                              <span className="price-box">
-                                10 mg：{price10}
-                              </span>
-                            )}
-                            {price12_5 && (
-                              <span className="price-box">
-                                12.5 mg：{price12_5}
-                              </span>
-                            )}
-                            {price15 && (
-                              <span className="price-box">
-                                15 mg：{price15}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <>
-                            {price5 && (
-                              <span className="price-box">5 mg：{price5}</span>
-                            )}
-                            {price10 && (
-                              <span className="price-box">
-                                10 mg：{price10}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-                      {note && (
-                        <div className="clinic-note">
-                          <div className="note-text">{note}</div>
-                        </div>
-                      )}
-                      <div className="clinic-footer">
-                        <button
-                          type="button"
-                          className="clinic-edit-btn"
-                          onClick={() => openReportModal(item)}
-                        >
-                          <FaRegEdit className="clinic-edit-icon" />
-                          <span>協助更新</span>
-                        </button>
-                      </div>
-                    </article>
-                  );
-                })}
-
-                {filteredData.length === 0 && (
-                  <p className="status-text">目前沒有符合條件的資料。</p>
-                )}
-              </section>
+              <PriceCardList
+                data={filteredData}
+                showAllDoses={showAllDoses}
+                onOpenReport={openReportModal}
+              />
             ) : (
-              <section className="table-card">
-                <div className="table-scroll">
-                  <table className="price-table">
-                    <thead>
-                      <tr>
-                        <th>城市</th>
-                        <th>地區</th>
-                        <th>類型</th>
-                        <th>名稱</th>
-
-                        {showAllDoses ? (
-                          <>
-                            <th>2.5 mg</th>
-                            <th>5 mg</th>
-                            <th>7.5 mg</th>
-                            <th>10 mg</th>
-                            <th>12.5 mg</th>
-                            <th>15 mg</th>
-                          </>
-                        ) : (
-                          <>
-                            <th>5 mg</th>
-                            <th>10 mg</th>
-                          </>
-                        )}
-
-                        <th>備註</th>
-                        <th>更新日期</th>
-                        <th>協助更新</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredData.map((item, index) => {
-                        const typeCode = getCanonicalTypeCode(item.type);
-                        const lastUpdatedText = formatLastUpdated(
-                          item.last_updated
-                        );
-                        const note = item.note || "-";
-                        const isExpanded = expandedNoteId === item.id;
-
-                        return (
-                          <tr key={`${item.id}-${index}-row`}>
-                            <td className="col-city">
-                              {CITY_LABELS[item.city] || item.city || "-"}
-                            </td>
-                            <td>{item.district || "-"}</td>
-                            <td className="col-type">
-                              {TYPE_LABELS[typeCode] || "診所"}
-                            </td>
-                            <td className="col-clinic">{item.clinic}</td>
-
-                            {showAllDoses ? (
-                              <>
-                                <td>{formatPrice(item.price2_5mg) || "-"}</td>
-                                <td>{formatPrice(item.price5mg) || "-"}</td>
-                                <td>{formatPrice(item.price7_5mg) || "-"}</td>
-                                <td>{formatPrice(item.price10mg) || "-"}</td>
-                                <td>{formatPrice(item.price12_5mg) || "-"}</td>
-                                <td>{formatPrice(item.price15mg) || "-"}</td>
-                              </>
-                            ) : (
-                              <>
-                                <td>{formatPrice(item.price5mg) || "-"}</td>
-                                <td>{formatPrice(item.price10mg) || "-"}</td>
-                              </>
-                            )}
-
-                            <td
-                              className={`col-note ${
-                                isExpanded ? "note-expanded" : "note-collapsed"
-                              }`}
-                            >
-                              <div className="note-text">{note}</div>
-                              {item.note && item.note.length > 30 && (
-                                <button
-                                  type="button"
-                                  className="note-toggle"
-                                  onClick={() =>
-                                    setExpandedNoteId(
-                                      isExpanded ? null : item.id
-                                    )
-                                  }
-                                >
-                                  {isExpanded ? (
-                                    <FaChevronUp className="note-icon" />
-                                  ) : (
-                                    <FaChevronDown className="note-icon" />
-                                  )}
-                                </button>
-                              )}
-                            </td>
-                            <td>
-                              {lastUpdatedText && (
-                                <span className="last-updated">
-                                  {lastUpdatedText}
-                                </span>
-                              )}
-                            </td>
-                            <td>
-                              <FaRegEdit
-                                type="button"
-                                className="report-icon-btn"
-                                onClick={() => openReportModal(item)}
-                                title="編輯 / 協助更新此筆資料"
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
-
-                      {filteredData.length === 0 && (
-                        <tr>
-                          <td
-                            colSpan={totalColumns}
-                            style={{ textAlign: "center", padding: "12px" }}
-                          >
-                            目前沒有符合條件的資料。
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
+              <PriceTable
+                data={filteredData}
+                showAllDoses={showAllDoses}
+                expandedNoteId={expandedNoteId}
+                setExpandedNoteId={setExpandedNoteId}
+                onOpenReport={openReportModal}
+              />
             )}
           </>
         )}
 
-        {/* 協助更新 Modal（抽成獨立元件） */}
+        {/* Report modal */}
         {reportTarget && (
           <PriceReportModal
             target={reportTarget}
