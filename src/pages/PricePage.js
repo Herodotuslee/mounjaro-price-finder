@@ -15,6 +15,7 @@ import {
   matchesKeyword,
   toNullableInt,
 } from "../utils/priceHelpers";
+import LoadingIndicator from "../components/LoadingIndicator.js";
 
 // ---------- Component ----------
 function PricePage() {
@@ -191,7 +192,7 @@ function PricePage() {
         {/* Main disclaimer */}
         <div className="info-banner warning-block">⚠️ {texts.disclaimer}</div>
 
-        {loading && <p className="status-text">正在載入最新價格資料⋯⋯</p>}
+        {loading && <LoadingIndicator centered={true} />}
         {error && <p className="status-text error">{error}</p>}
 
         {/* Filters */}

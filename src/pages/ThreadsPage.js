@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 function ThreadsPage() {
   const [posts, setPosts] = useState([]);
@@ -234,7 +235,7 @@ function ThreadsPage() {
         </div>
       )}
 
-      {loading && <p style={{ fontSize: 13, color: "#6b7280" }}>載入中⋯⋯</p>}
+      {loading && <LoadingIndicator centered={true} />}
 
       {!loading && filteredPosts.length === 0 && (
         <p style={{ fontSize: 13, color: "#6b7280" }}>
