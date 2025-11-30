@@ -15,6 +15,7 @@ import {
   matchesKeyword,
   toNullableInt,
 } from "../utils/priceHelpers";
+import LoadingIndicator from "../components/LoadingIndicator.js";
 
 // ---------- Component ----------
 function PricePage() {
@@ -34,7 +35,7 @@ function PricePage() {
   // Desktop: which note row is expanded
   const [expandedNoteId, setExpandedNoteId] = useState(null);
 
-  // Report modal state
+  // Report modal state (per-row report)
   const [reportTarget, setReportTarget] = useState(null);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportError, setReportError] = useState(null);
@@ -183,15 +184,18 @@ function PricePage() {
         {/* Header */}
         <header className="page-header">
           <h1 className="page-title">全國猛健樂價格整理</h1>
-          <p className="page-subtitle">
-            整理台灣各縣市診所與藥局的自費價格資訊，方便查詢與比較。
-          </p>
+
+          <div className="page-subtitle-row">
+            <p className="page-subtitle-text">
+              整理台灣各縣市診所與藥局的自費價格資訊，方便查詢與比較，歡迎協助回報價格
+            </p>
+          </div>
         </header>
 
         {/* Main disclaimer */}
         <div className="info-banner warning-block">⚠️ {texts.disclaimer}</div>
 
-        {loading && <p className="status-text">正在載入最新價格資料⋯⋯</p>}
+        {loading && <LoadingIndicator centered={true} />}
         {error && <p className="status-text error">{error}</p>}
 
         {/* Filters */}
@@ -285,7 +289,7 @@ function PricePage() {
           </>
         )}
 
-        {/* Report modal */}
+        {/* Report modal (per-row) */}
         {reportTarget && (
           <PriceReportModal
             target={reportTarget}

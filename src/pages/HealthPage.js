@@ -31,7 +31,7 @@ function HealthPage() {
       <header className="page-header">
         <h1 className="page-title">猛健樂健康任務指南</h1>
         <p className="page-subtitle">
-          以下內容是針對一般成人的基本健康與飲食觀念整理，實際情況仍會因人而異。若有慢性病、特殊用藥或其他疑慮，請務必與醫師或營養師討論。
+          以下整理一些常見的健康任務與建議，幫助你在使用猛健樂的過程中達成最佳效果。
         </p>
       </header>
 

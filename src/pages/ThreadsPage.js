@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
+import LoadingIndicator from "../components/LoadingIndicator";
+import useIsMobile from "../hooks/useIsMobile";
 
 function ThreadsPage() {
   const [posts, setPosts] = useState([]);
@@ -10,6 +12,7 @@ function ThreadsPage() {
   const [selectedTag, setSelectedTag] = useState(null);
 
   const navigate = useNavigate();
+  const isMobile = useIsMobile(640);
 
   // Load articles from Supabase
   useEffect(() => {
@@ -56,9 +59,9 @@ function ThreadsPage() {
       ? postsWithTags
       : postsWithTags.filter((post) => post.tags.includes(selectedTag));
 
-  // Shared page styles
+  // ---------- Shared page styles (responsive) ----------
   const pageRootStyle = {
-    padding: 20,
+    padding: isMobile ? 16 : 20,
     maxWidth: 960,
     margin: "0 auto",
   };
@@ -66,14 +69,14 @@ function ThreadsPage() {
   const cardStyle = {
     border: "1px solid #e5e7eb",
     borderRadius: 12,
-    padding: 12,
+    padding: isMobile ? 10 : 12,
     marginBottom: 12,
     background: "#ffffff",
   };
 
   const tagFilterContainerStyle = {
-    marginBottom: 18,
-    padding: 10,
+    marginBottom: isMobile ? 14 : 18,
+    padding: isMobile ? 8 : 10,
     borderRadius: 10,
     background: "#f9fafb",
     border: "1px solid #e5e7eb",
@@ -81,15 +84,15 @@ function ThreadsPage() {
 
   const tagChipBaseStyle = {
     borderRadius: 999,
-    fontSize: 12,
-    padding: "4px 10px",
+    fontSize: isMobile ? 11 : 12,
+    padding: isMobile ? "3px 8px" : "4px 10px",
     cursor: "pointer",
     whiteSpace: "nowrap",
   };
 
   const smallPillButtonBase = {
     fontSize: 12,
-    padding: "4px 10px",
+    padding: isMobile ? "4px 8px" : "4px 10px",
     borderRadius: 6,
     border: "1px solid #d1d5db",
     background: "#f9fafb",
@@ -129,7 +132,6 @@ function ThreadsPage() {
               flexWrap: "wrap",
             }}
           >
-            {/* Advanced pharmacology */}
             <button
               type="button"
               onClick={() => navigate("/advanced")}
@@ -148,7 +150,6 @@ function ThreadsPage() {
               進階藥理知識
             </button>
 
-            {/* Notion nutrition notes */}
             <a
               href="https://sunny-hourglass-05c.notion.site/2ba7da0c290680248b66d644b0d9d910"
               target="_blank"
@@ -175,8 +176,8 @@ function ThreadsPage() {
         </p>
       </header>
 
-      {/* Tag filters */}
-      {allTags.length > 0 && (
+      {/* Tag filters – hidden on mobile */}
+      {!isMobile && allTags.length > 0 && (
         <div style={tagFilterContainerStyle}>
           <div
             style={{
@@ -188,7 +189,13 @@ function ThreadsPage() {
             依標籤瀏覽文章：
           </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+            }}
+          >
             {/* "All" tag */}
             <button
               type="button"
@@ -234,7 +241,7 @@ function ThreadsPage() {
         </div>
       )}
 
-      {loading && <p style={{ fontSize: 13, color: "#6b7280" }}>載入中⋯⋯</p>}
+      {loading && <LoadingIndicator centered={true} />}
 
       {!loading && filteredPosts.length === 0 && (
         <p style={{ fontSize: 13, color: "#6b7280" }}>
@@ -289,6 +296,34 @@ function ThreadsPage() {
                     {post.category}
                   </span>
                 )}
+
+                {/* Green tag chips under title, always visible */}
+                {post.tags.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: 4,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 4,
+                    }}
+                  >
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          display: "inline-block",
+                          fontSize: 11,
+                          padding: "2px 8px",
+                          background: "#ecfdf5",
+                          color: "#047857",
+                          borderRadius: 999,
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <span
@@ -339,28 +374,6 @@ function ThreadsPage() {
                   >
                     {post.description}
                   </p>
-                )}
-
-                {post.tags.length > 0 && (
-                  <div style={{ marginBottom: 10 }}>
-                    {post.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        style={{
-                          display: "inline-block",
-                          fontSize: 12,
-                          padding: "2px 8px",
-                          background: "#ecfdf5",
-                          color: "#047857",
-                          borderRadius: 999,
-                          marginRight: 6,
-                          marginBottom: 4,
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
                 )}
 
                 {post.url && (
