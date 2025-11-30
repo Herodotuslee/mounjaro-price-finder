@@ -1,5 +1,6 @@
 /* navbar.css */
 
+/* ---------- Shell ---------- */
 .navbar {
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
@@ -8,25 +9,56 @@
 .nav-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
+  gap: 16px;
 }
 
-/* 左側選單 */
+/* ---------- Brand ---------- */
+.nav-brand {
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 22px;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.nav-brand:hover {
+  color: #0f766e;
+}
+
+/* ---------- Main area (links + actions) ---------- */
+.nav-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+/* ---------- Links ---------- */
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 16px;
-  margin: 0 0 0 24px;
+  gap: 14px;
+  margin: 0;
   padding: 0;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .nav-item {
+  position: relative;
   text-decoration: none;
-  font-size: 15px;
+  font-size: 14px;
   color: #4b5563;
+  padding-top: 2px;
   padding-bottom: 2px;
+}
+
+.nav-item:hover {
+  color: #0f172a;
 }
 
 .nav-item.active {
@@ -35,26 +67,31 @@
   border-bottom: 2px solid #0f172a;
 }
 
-/* 右側 LINE / Coffee 區塊 */
+/* ---------- Right actions: LINE + Donate (desktop) ---------- */
 .nav-actions {
-  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  white-space: nowrap;
 }
 
+/* LINE simple style */
 .nav-line-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   text-decoration: none;
-  color: #10b981;
-  font-weight: 500;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #047857;
   font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
   transition: opacity 0.2s ease;
 }
 
 .nav-line-link:hover {
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .nav-line-icon {
@@ -63,74 +100,98 @@
   margin-right: 6px;
 }
 
+/* Donate simple icon */
 .nav-coffee-link {
-  font-size: 20px;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  color: #6b7280;
-  transition: color 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .nav-coffee-link:hover {
-  color: #f59e0b;
+  opacity: 0.75;
 }
 
-/* 🔻 手機版：改成直向堆疊，標題 → 選單 → icon */
+.nav-coffee-link img {
+  height: 30px;
+  object-fit: contain;
+}
+
+/* ---------- Mobile layout: stack nav, actions float bottom-right ---------- */
 @media (max-width: 640px) {
   .nav-container {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .nav-brand {
+    font-size: 20px;
+  }
+
+  .nav-main {
+    width: 100%;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
 
   .nav-links {
-    margin-left: 0;
-    gap: 8px;
+    width: 100%;
     flex-wrap: wrap;
+    gap: 8px 12px;
   }
 
+  .nav-item {
+    font-size: 13px;
+  }
+
+  /* Float LINE + coffee at bottom-right, but smaller & subtle */
   .nav-actions {
-    margin-left: 0;
+    position: fixed;
+    right: 12px;
+    bottom: 18px;
+    z-index: 50;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .nav-line-link,
+  .nav-coffee-link {
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 999px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
   }
 
   .nav-line-link {
-    font-size: 13px;
+    font-size: 12px;
+    color: #047857;
   }
-}
-.nav-item {
-  position: relative;
-}
 
-.nav-tooltip {
-  position: absolute;
-  top: 130%;
-  left: 50%;
-  transform: translateX(-50%);
+  .nav-line-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
 
-  width: 260px;
-  padding: 14px 16px;
+  .nav-coffee-link {
+    padding: 6px 8px;
+  }
 
-  background: white;
-  color: #0f172a;
-  border: 1px solid rgba(15, 118, 110, 0.25);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 1000;
-}
-
-.nav-item:hover .nav-tooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(4px);
-}
-
-.nav-brand {
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 22px;
-  color: #0f172a;
-  letter-spacing: 0.02em;
+  .nav-coffee-link img {
+    height: 22px;
+  }
 }
