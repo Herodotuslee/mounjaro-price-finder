@@ -1,5 +1,6 @@
 // src/pages/DoseCalculatorPage.js
 import React, { useState } from "react";
+import text from "../data/texts.json";
 
 const PEN_OPTIONS = [2.5, 5, 7.5, 10, 12.5, 15];
 
@@ -15,7 +16,6 @@ function DoseCalculatorPage() {
       setDose("");
       return;
     }
-    // 單次不超過該劑型標示劑量
     const safeValue = Math.min(num, penStrength);
     setDose(safeValue);
   };
@@ -41,7 +41,6 @@ function DoseCalculatorPage() {
         劑量計算器
       </h1>
 
-      {/* 劑型選擇 */}
       <label style={{ fontSize: 14, fontWeight: 600 }}>
         請選擇您購買的劑型 (mg)
       </label>
@@ -143,24 +142,8 @@ function DoseCalculatorPage() {
         </>
       )}
 
-      {/* 重要提醒 */}
-      <div
-        style={{
-          marginTop: 18,
-          padding: 12,
-          borderRadius: 8,
-          background: "#fef2f2",
-          border: "1px solid #fecaca",
-          fontSize: 12,
-          lineHeight: 1.7,
-          color: "#991b1b",
-        }}
-      >
-        <strong>重要提醒：</strong>
-        <br />
-        官方仿單建議開封後保存期限不應該超過一個月。
-        若超過一個月使用請好好保存藥劑，自行負責，
-        若藥劑外觀或性狀有任何異狀，請勿使用。
+      <div className="info-banner warning-block" style={{ marginTop: 24 }}>
+        {text.expiredWarning}
       </div>
     </div>
   );

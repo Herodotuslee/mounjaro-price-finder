@@ -17,21 +17,9 @@ function App() {
       {/* 🔹 Navbar */}
       <nav className="navbar">
         <div className="nav-container">
-          <NavLink
-            to="/"
-            style={{
-              textDecoration: "none",
-              fontWeight: 700,
-              fontSize: 22,
-              color: "#0f172a",
-              transition: "color 0.2s ease",
-            }}
-            onMouseEnter={(e) => (e.target.style.color = "#0f766e")}
-            onMouseLeave={(e) => (e.target.style.color = "#0f172a")}
-          >
+          <NavLink to="/" className="nav-brand">
             台灣猛健樂資訊網
           </NavLink>
-
           <ul className="nav-links">
             <li>
               <NavLink to="/" end className="nav-item">
@@ -68,7 +56,7 @@ function App() {
             </li>
             <li>
               <NavLink to="/threads" className="nav-item">
-                衛教文章
+                精選文章
               </NavLink>
             </li>
           </ul>

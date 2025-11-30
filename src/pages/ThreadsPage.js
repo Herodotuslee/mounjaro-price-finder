@@ -1,28 +1,28 @@
 // src/pages/ThreadsPage.js
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // 🆕 新增
+import { useNavigate } from "react-router-dom";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 
 function ThreadsPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null);
-  const [selectedTag, setSelectedTag] = useState(null); // 目前選中的標籤
-  const navigate = useNavigate(); // 🆕
+  const [selectedTag, setSelectedTag] = useState(null);
 
+  const navigate = useNavigate();
+
+  // Load articles from Supabase
   useEffect(() => {
     const loadData = async () => {
       const url =
-        SUPABASE_URL +
-        "/rest/v1/health_articles" +
+        `${SUPABASE_URL}/rest/v1/health_articles` +
         "?select=id,title,description,url,doctor_name,doctor_title,category,created_at,note,health_article_tags(health_tags(name))" +
-        "&url=ilike.%25threads.com%25" +
         "&order=created_at.desc";
 
       const res = await fetch(url, {
         headers: {
           apikey: SUPABASE_ANON_KEY,
-          Authorization: "Bearer " + SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
       });
 
@@ -34,11 +34,12 @@ function ThreadsPage() {
     loadData();
   }, []);
 
+  // Toggle open/close for a single article
   const toggleOpen = (id) => {
     setOpenId((prev) => (prev === id ? null : id));
   };
 
-  // ---------- 整理 tags ----------
+  // Normalize tags
   const postsWithTags = posts.map((post) => ({
     ...post,
     tags: post.health_article_tags?.map((t) => t.health_tags?.name) || [],
@@ -50,78 +51,133 @@ function ThreadsPage() {
     )
   ).sort();
 
-  // 依照選取的標籤過濾文章
   const filteredPosts =
     selectedTag == null
       ? postsWithTags
       : postsWithTags.filter((post) => post.tags.includes(selectedTag));
 
+  // Shared page styles
+  const pageRootStyle = {
+    padding: 20,
+    maxWidth: 960,
+    margin: "0 auto",
+  };
+
+  const cardStyle = {
+    border: "1px solid #e5e7eb",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    background: "#ffffff",
+  };
+
+  const tagFilterContainerStyle = {
+    marginBottom: 18,
+    padding: 10,
+    borderRadius: 10,
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+  };
+
+  const tagChipBaseStyle = {
+    borderRadius: 999,
+    fontSize: 12,
+    padding: "4px 10px",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  };
+
+  const smallPillButtonBase = {
+    fontSize: 12,
+    padding: "4px 10px",
+    borderRadius: 6,
+    border: "1px solid #d1d5db",
+    background: "#f9fafb",
+    color: "#4b5563",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    transition: "all 0.15s ease",
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 4,
+  };
+
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: "auto" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          marginBottom: 10,
-          flexWrap: "wrap",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 24,
-            fontWeight: "bold",
-            margin: 0,
-          }}
-        >
-          精選衛教文
-        </h1>
-
-        {/* 🆕 進階藥理知識按鈕（低存在感版本） */}
-        <button
-          type="button"
-          onClick={() => navigate("/advanced")}
-          style={{
-            fontSize: 12,
-            padding: "4px 10px",
-            borderRadius: 6,
-            border: "1px solid #d1d5db",
-            background: "#f9fafb",
-            color: "#4b5563",
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-            transition: "all 0.15s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#f3f4f6";
-            e.currentTarget.style.color = "#374151";
-            e.currentTarget.style.borderColor = "#cbd5e1";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "#f9fafb";
-            e.currentTarget.style.color = "#4b5563";
-            e.currentTarget.style.borderColor = "#d1d5db";
-          }}
-        >
-          進階藥理知識 →
-        </button>
-      </div>
-
-      <p style={{ fontSize: 13, color: "#4b5563", marginBottom: 16 }}>
-        精選與減重、運動、健康知識相關的 網路衛教文章整理，點標題展開內容。
-      </p>
-
-      {/* ------- 標籤雲（Tag Cloud） ------- */}
-      {allTags.length > 0 && (
+    <div style={pageRootStyle}>
+      {/* Page header */}
+      <header className="page-header">
         <div
           style={{
-            marginBottom: 18,
-            padding: 10,
-            borderRadius: 10,
-            background: "#f9fafb",
-            border: "1px solid #e5e7eb",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
           }}
         >
+          <h1 className="page-title" style={{ marginBottom: 0 }}>
+            精選衛教筆記
+          </h1>
+
+          {/* Right-side action buttons */}
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            {/* Advanced pharmacology */}
+            <button
+              type="button"
+              onClick={() => navigate("/advanced")}
+              style={smallPillButtonBase}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f3f4f6";
+                e.currentTarget.style.color = "#374151";
+                e.currentTarget.style.borderColor = "#cbd5e1";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#f9fafb";
+                e.currentTarget.style.color = "#4b5563";
+                e.currentTarget.style.borderColor = "#d1d5db";
+              }}
+            >
+              進階藥理知識
+            </button>
+
+            {/* Notion nutrition notes */}
+            <a
+              href="https://sunny-hourglass-05c.notion.site/2ba7da0c290680248b66d644b0d9d910"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={smallPillButtonBase}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f3f4f6";
+                e.currentTarget.style.color = "#374151";
+                e.currentTarget.style.borderColor = "#cbd5e1";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#f9fafb";
+                e.currentTarget.style.color = "#4b5563";
+                e.currentTarget.style.borderColor = "#d1d5db";
+              }}
+            >
+              營養師諮詢筆記
+            </a>
+          </div>
+        </div>
+
+        <p className="page-subtitle" style={{ marginTop: 6 }}>
+          精選優秀醫師們的猛健樂相關衛教文章，點標題展開內容。
+        </p>
+      </header>
+
+      {/* Tag filters */}
+      {allTags.length > 0 && (
+        <div style={tagFilterContainerStyle}>
           <div
             style={{
               fontSize: 12,
@@ -133,24 +189,26 @@ function ThreadsPage() {
           </div>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {/* "All" tag */}
             <button
               type="button"
               onClick={() => setSelectedTag(null)}
               style={{
-                borderRadius: 999,
+                ...tagChipBaseStyle,
                 border: "1px solid #2563eb",
                 background: selectedTag == null ? "#2563eb" : "#eff6ff",
                 color: selectedTag == null ? "#ffffff" : "#1d4ed8",
-                fontSize: 12,
-                padding: "4px 12px",
-                cursor: "pointer",
                 fontWeight: 600,
-                boxShadow: selectedTag == null ? "0 0 0 1px #2563eb" : "none",
-                transition: "all 0.15s ease",
+                boxShadow:
+                  selectedTag == null
+                    ? "0 0 0 1px rgba(37, 99, 235, 0.35)"
+                    : "none",
               }}
             >
               全部
             </button>
+
+            {/* Individual tags */}
             {allTags.map((tag) => {
               const isActive = selectedTag === tag;
               return (
@@ -161,17 +219,11 @@ function ThreadsPage() {
                     setSelectedTag((prev) => (prev === tag ? null : tag))
                   }
                   style={{
-                    borderRadius: 999,
+                    ...tagChipBaseStyle,
                     border: "1px solid",
-                    borderColor: isActive
-                      ? "#16a34a"
-                      : "rgba(209, 213, 219, 1)",
+                    borderColor: isActive ? "#16a34a" : "#d1d5db",
                     background: isActive ? "#dcfce7" : "#ffffff",
                     color: isActive ? "#166534" : "#374151",
-                    fontSize: 12,
-                    padding: "4px 10px",
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
                   }}
                 >
                   {tag}
@@ -182,7 +234,7 @@ function ThreadsPage() {
         </div>
       )}
 
-      {loading && <p>載入中…</p>}
+      {loading && <p style={{ fontSize: 13, color: "#6b7280" }}>載入中⋯⋯</p>}
 
       {!loading && filteredPosts.length === 0 && (
         <p style={{ fontSize: 13, color: "#6b7280" }}>
@@ -190,23 +242,15 @@ function ThreadsPage() {
         </p>
       )}
 
+      {/* Article cards */}
       {filteredPosts.map((post) => {
-        const isOpen = openId === post.id;
+        const isOpen = openId === String(post.id);
 
         return (
-          <div
-            key={post.id}
-            style={{
-              border: "1px solid #e5e7eb",
-              borderRadius: 12,
-              padding: 12,
-              marginBottom: 12,
-              background: "#ffffff",
-            }}
-          >
-            {/* clickable 標題 */}
+          <article key={post.id} style={cardStyle}>
             <button
-              onClick={() => toggleOpen(post.id)}
+              type="button"
+              onClick={() => toggleOpen(String(post.id))}
               style={{
                 display: "flex",
                 width: "100%",
@@ -258,10 +302,8 @@ function ThreadsPage() {
               </span>
             </button>
 
-            {/* 展開後內容 */}
             {isOpen && (
               <div style={{ marginTop: 10 }}>
-                {/* NOTE 小標題摘要 */}
                 {post.note && (
                   <div
                     style={{
@@ -285,7 +327,6 @@ function ThreadsPage() {
                   </div>
                 )}
 
-                {/* description 正文 */}
                 {post.description && (
                   <p
                     style={{
@@ -300,7 +341,6 @@ function ThreadsPage() {
                   </p>
                 )}
 
-                {/* tags 顯示在卡片內 */}
                 {post.tags.length > 0 && (
                   <div style={{ marginBottom: 10 }}>
                     {post.tags.map((tag) => (
@@ -323,7 +363,6 @@ function ThreadsPage() {
                   </div>
                 )}
 
-                {/* Threads 原文按鈕（右下角） */}
                 {post.url && (
                   <div
                     style={{
@@ -353,9 +392,13 @@ function ThreadsPage() {
                 )}
               </div>
             )}
-          </div>
+          </article>
         );
       })}
+
+      <p className="threads-disclaimer">
+        本站整理之衛教內容係擷取自網路上醫師或專業醫療人員公開之衛教文章，並經本人統整、節錄與改寫後再行刊登，且皆附上原始出處連結。若您為原作者且不希望內容被引用或節錄，敬請來信告知，將盡速協助下架或調整。
+      </p>
     </div>
   );
 }

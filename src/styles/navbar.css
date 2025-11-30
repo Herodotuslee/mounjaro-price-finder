@@ -126,3 +126,11 @@
   opacity: 1;
   transform: translateX(-50%) translateY(4px);
 }
+
+.nav-brand {
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 22px;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+}

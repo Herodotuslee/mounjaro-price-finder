@@ -26,23 +26,29 @@
 
 /* ---------------- Info block ---------------- */
 .report-info-block {
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: #e0f2fe;
-  color: #0f172a;
-  font-size: 14px;
-  line-height: 1.7;
+  background: #f0f7ff; /* super light blue */
+  border: 1px solid #bfdbfe; /* soft blue border */
+  padding: 16px 18px;
+  border-radius: 12px;
+  color: #0f172a; /* dark readable text */
+  margin-bottom: 20px;
 }
 
 .report-info-text {
-  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
 }
 
 .report-info-list {
-  padding-left: 18px;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.report-info-list li {
+  font-size: 14px;
+  line-height: 1.6;
   margin-bottom: 8px;
-  font-size: 13px;
 }
 
 /* ---------------- Message ---------------- */
@@ -113,7 +119,7 @@
   cursor: pointer;
 }
 
-/* ---------------- 價格區塊 ---------------- */
+/* ---------------- Price section ---------------- */
 .price-section {
   margin-bottom: 16px;
   padding: 12px 14px;
@@ -138,7 +144,7 @@
   margin-top: 2px;
 }
 
-/* 兩欄 grid（手機自動變一欄） */
+/* Two-column grid (auto to one column on mobile) */
 .price-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -151,7 +157,7 @@
   }
 }
 
-/* 每個劑量小卡片 */
+/* Each dose card */
 .price-field {
   background: #ffffff;
   border-radius: 10px;

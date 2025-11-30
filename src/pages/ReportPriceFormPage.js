@@ -140,12 +140,13 @@ function ReportPriceFormPage() {
   return (
     <div className="report-page-root">
       <div className="report-page-inner">
-        <h1 className="report-title">回報表單</h1>
-
-        <p className="report-subtitle">
-          希望健康的體態是每個台灣人都能追求的權利，不再是遙不可及。
-        </p>
-
+        {/* Header */}
+        <header className="page-header">
+          <h1 className="page-title">回報表單</h1>
+          <p className="page-subtitle">
+            希望健康的體態是每個台灣人都能追求的權利，不再是遙不可及。
+          </p>
+        </header>
         <div className="report-info-block">
           <p className="report-info-text">
             感謝你願意協助回報「合理價格」的猛健樂價格促進善的循環，這個網站是靠大家一起維護的民間資訊整理。當然，價格並非唯一因素，如果有推薦好醫師也歡迎告知！

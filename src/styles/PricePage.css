@@ -10,23 +10,6 @@
   margin: 0 auto;
 }
 
-/* ---------------- Header ---------------- */
-.page-header {
-  margin-bottom: 8px;
-}
-
-.page-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.page-subtitle {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #6b7280;
-}
-
 /* ---------------- Status text ---------------- */
 .status-text {
   margin-top: 8px;
@@ -280,6 +263,19 @@
   align-self: center;
 }
 
+/* Footer row: left (date) + right (button) */
+.clinic-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Subtle updated date style */
+.updated-date {
+  font-size: 12px;
+  color: #94a3b8; /* slate-400 */
+}
 /* 右下角的小型協助更新按鈕 */
 .clinic-edit-btn {
   margin-left: auto; /* ⭐ 關鍵：把按鈕推到最右邊 */
@@ -494,4 +490,20 @@
 .last-updated {
   font-size: 12px;
   color: #6b7280;
+}
+
+/* Hidden by default (desktop) */
+.mobile-updated-date {
+  display: none;
+}
+
+/* Mobile only */
+@media (max-width: 640px) {
+  .mobile-updated-date {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8; /* slate-400，低調 */
+    margin-top: 4px;
+    margin-bottom: 6px;
+  }
 }
