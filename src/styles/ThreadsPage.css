@@ -19,26 +19,6 @@
   flex-wrap: wrap;
 }
 
-/* Action Pill Buttons (Top Right) */
-.action-pill-btn {
-  font-size: 13px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--ac-brown);
-  background: #fff;
-  color: var(--ac-brown-dark);
-  cursor: pointer;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.action-pill-btn:hover {
-  background: var(--ac-cream);
-  transform: translateY(-1px);
-}
-
 /* ---------- Tag Filter Container ---------- */
 .tag-filter-container {
   margin-bottom: 20px;
@@ -62,29 +42,45 @@
 }
 
 /* Tag Chips */
+/* ---------- Tag Filter Container ---------- */
+/* ... (上方保持不變) */
+
+/* Tag Chips */
 .tag-chip {
   padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--ac-brown-light);
   background: #fff;
   font-size: 13px;
   color: var(--ac-brown-dark);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-weight: 600;
+  transition: all 0.2s;
+  font-weight: 700;
+
+  /* 關鍵修正：防止點擊時文字被瀏覽器選取（反白） */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .tag-chip:hover {
-  background: var(--ac-cream);
-  transform: translateY(-2px);
+  background: var(--ac-cream); /* 懸停時淡淡的奶油色 */
+  border-color: var(--ac-brown);
 }
 
+/* Tag Active State (選中狀態) - 修改版 */
 .tag-chip-active {
-  background: var(--ac-green);
-  border-color: var(--ac-green-dark);
-  color: #fff;
-  box-shadow: 0 2px 0 var(--ac-brown);
+  /* 改掉原本的深底白字，改成清爽風格 */
+  background: var(--ac-cream); /* 背景維持淺色 */
+
+  /* 邊框和文字變色來表示選中，例如用明顯的綠色或深咖啡色 */
+  border-color: var(--ac-teal);
+  color: var(--ac-teal);
+
+  /* 加粗邊框效果 (利用 box-shadow 模擬，不影響排版) */
+  box-shadow: 0 0 0 1px var(--ac-teal);
 }
+
+/* ... (其餘 CSS 保持不變) */
 
 /* ---------- Threads List ---------- */
 .threads-list {
@@ -166,11 +162,13 @@
 .thread-tag-pill {
   display: inline-block;
   font-size: 11px;
-  padding: 2px 8px;
-  background: var(--ac-green-light);
-  color: var(--ac-green-dark);
+  padding: 3px 10px; /* 稍微增加一點內邊距 */
+  /* 改用更柔和的配色組合 */
+  background: #e0f2e0; /* 非常淺的柔和綠色背景 */
+  color: #2e7d32; /* 深綠色文字，對比度更高 */
+  border: 1px solid #c8e6c9; /* 加上一個淡淡的邊框 */
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Toggle Icon (+ / -) */
