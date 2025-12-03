@@ -1,54 +1,60 @@
 // src/pages/LazyPage.js
 import React from "react";
+import "../styles/LazyPage.css";
+import "../styles/PricePage.css"; // 引入主主題變數
 
 function LazyPage() {
-  const pageRootStyle = {
-    padding: "20px",
-    maxWidth: 960,
-    margin: "0 auto",
-  };
-
-  const cardStyle = {
-    background: "#ffffff",
-    borderRadius: 12,
-    overflow: "hidden",
-    boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
-    marginBottom: 24,
-    border: "1px solid #e5e7eb",
-  };
-
-  const imageStyle = {
-    display: "block",
-    width: "100%",
-    height: "auto",
-  };
-
   return (
-    <div style={pageRootStyle}>
-      {/* Shared page header */}
-      <header className="page-header">
-        <h1 className="page-title">猛健樂購買指南與使用懶人包</h1>
-        <p className="page-subtitle">
-          這是最精簡的懶人包。第一張圖若是研究清楚相較於完全沒做功課的人，能幫你一個月省約數千到一萬多元。用藥時把第二張圖的重點放在心理，如果都能做到你的減重過程會比99%人更健康順利。至於自己的BMR是多少可以參考Inbody或是輸入詳細資料問GPT估計。
-        </p>
-      </header>
-      {/* Card 1: Buying guide */}
-      <article style={cardStyle}>
-        <img
-          src="/image/buying.jpg"
-          alt="猛健樂購買指南懶人包"
-          style={imageStyle}
-        />
-      </article>
+    <div className="price-page-root">
+      <div className="price-page-inner">
+        {/* --- Header --- */}
+        <header className="page-header">
+          <h1 className="page-title">
+            <span className="title-icon">📖</span> 新手懶人包
+          </h1>
+          <p className="page-subtitle-text">
+            這是最精簡的攻略指南。
+            <br />
+            第一張圖能幫你省下不少錢（約數千到一萬多元）；
+            <br />
+            第二張圖則是健康減重的關鍵心法，跟著做能比 99% 的人更順利喔！
+          </p>
+        </header>
 
-      {/* Card 2: Using / injection guide */}
-      <article style={cardStyle}>
-        <img
-          src="/image/using.png"
-          alt="猛健樂使用方式懶人包"
-          style={imageStyle}
-        />
-      </article>
+        {/* --- Card 1: Buying Guide --- */}
+        {/* 移除 rotate class，保持端正 */}
+        <article className="lazy-card">
+          {/* 紙膠帶裝飾保留，作為視覺點綴 */}
+          <div className="tape-strip"></div>
+
+          <div className="lazy-card-content">
+            <h2 className="lazy-card-title title-buying">🛒 購買指南</h2>
+            <img
+              src="/image/buying.jpg"
+              alt="猛健樂購買指南懶人包"
+              className="lazy-image"
+            />
+          </div>
+        </article>
+
+        {/* --- Card 2: Using Guide --- */}
+        <article className="lazy-card">
+          <div className="tape-strip"></div>
+
+          <div className="lazy-card-content">
+            <h2 className="lazy-card-title title-using">💉 使用攻略</h2>
+            <img
+              src="/image/using.png"
+              alt="猛健樂使用方式懶人包"
+              className="lazy-image"
+            />
+            <p className="lazy-note">
+              💡 BMR (基礎代謝率) 可以參考 Inbody 機器測量，或是問問 GPT
+              幫你估算喔！
+            </p>
+          </div>
+        </article>
+      </div>
     </div>
   );
 }

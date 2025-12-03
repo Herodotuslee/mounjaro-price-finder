@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import "../styles/PricePage.css";
-import { TYPE_LABELS, TYPES } from "../data/prices";
+import { TYPES } from "../data/prices";
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import PriceReportModal from "../components/PriceReportModal";
@@ -17,25 +17,17 @@ import {
 } from "../utils/priceHelpers";
 import LoadingIndicator from "../components/LoadingIndicator.js";
 
-// ---------- Component ----------
 function PricePage() {
-  // Filters
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [keyword, setKeyword] = useState("");
 
-  // Data
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Dose display mode: only 5/10 mg vs all doses
   const [showAllDoses, setShowAllDoses] = useState(false);
 
-  // Desktop: which note row is expanded
-  const [expandedNoteId, setExpandedNoteId] = useState(null);
-
-  // Report modal state (per-row report)
   const [reportTarget, setReportTarget] = useState(null);
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportError, setReportError] = useState(null);
@@ -49,44 +41,33 @@ function PricePage() {
   const [reportPrice15, setReportPrice15] = useState("");
   const [reportNote, setReportNote] = useState("");
 
-  // Simple mobile width detection
   const isMobile = useIsMobile(640);
 
-  // Load data from Supabase once on mount
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
         setError(null);
-
         const url = `${SUPABASE_URL}/rest/v1/mounjaro_data?select=*`;
-
         const res = await fetch(url, {
           headers: {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
         });
-
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`HTTP ${res.status}: ${text}`);
-        }
-
+        if (!res.ok) throw new Error("Network response was not ok");
         const data = await res.json();
         setRows(data || []);
       } catch (err) {
-        console.error("Failed to load price data from Supabase:", err);
-        setError("載入資料時發生問題，請稍後再試。");
+        console.error(err);
+        setError("載入失敗... 請檢查網路連線後再試一次！");
       } finally {
         setLoading(false);
       }
     }
-
     fetchData();
   }, []);
 
-  // Build city filter options from data itself
   const cityOptions = useMemo(() => {
     const uniqueCities = Array.from(
       new Set(rows.map((r) => r.city).filter(Boolean))
@@ -94,7 +75,6 @@ function PricePage() {
     return ["all", ...uniqueCities];
   }, [rows]);
 
-  // Apply filters + keyword search
   const filteredData = useMemo(
     () =>
       rows.filter((row) => {
@@ -106,7 +86,6 @@ function PricePage() {
     [rows, selectedCity, selectedType, keyword]
   );
 
-  // Open report modal and prefill fields
   const openReportModal = (row) => {
     setReportTarget(row);
     setReportError(null);
@@ -126,17 +105,13 @@ function PricePage() {
     setReportSubmitting(false);
   };
 
-  // Submit report to mounjaro_reports
   const handleSubmitReport = async (e) => {
     e.preventDefault();
     if (!reportTarget) return;
-
     try {
       setReportSubmitting(true);
       setReportError(null);
-
       const url = `${SUPABASE_URL}/rest/v1/mounjaro_reports`;
-
       const body = {
         city: reportTarget.city,
         district: reportDistrict || reportTarget.district || null,
@@ -151,7 +126,6 @@ function PricePage() {
         note: reportNote || null,
         last_updated: new Date().toISOString().slice(0, 10),
       };
-
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -162,17 +136,12 @@ function PricePage() {
         },
         body: JSON.stringify(body),
       });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`HTTP ${res.status}: ${text}`);
-      }
-
-      alert("已送出協助更新，感謝你幫忙維護資訊！");
+      if (!res.ok) throw new Error("Submit failed");
+      alert("🎉 回報成功！非常感謝你的熱心幫忙！");
       closeReportModal();
     } catch (err) {
-      console.error("Failed to submit price update report:", err);
-      setReportError("送出失敗，請稍後再試。");
+      console.error(err);
+      setReportError("傳送失敗了... 請稍後再試試看！");
     } finally {
       setReportSubmitting(false);
     }
@@ -181,94 +150,107 @@ function PricePage() {
   return (
     <div className="price-page-root">
       <div className="price-page-inner">
-        {/* Header */}
         <header className="page-header">
-          <h1 className="page-title">全國猛健樂價格整理</h1>
-
-          <div className="page-subtitle-row">
-            <p className="page-subtitle-text">
-              整理台灣各縣市診所與藥局的自費價格資訊，方便查詢與比較，歡迎協助回報價格
-            </p>
-          </div>
+          <h1 className="page-title">
+            <span className="title-icon">📢</span> 全國價格公佈欄
+          </h1>
+          <p className="page-subtitle-text">
+            大家好！這裡是整理各地診所與藥局價格的地方。
+            <br />
+            如果發現資訊有變動，歡迎協助回報更新喔！
+          </p>
         </header>
 
-        {/* Main disclaimer */}
-        <div className="info-banner warning-block">⚠️ {texts.disclaimer}</div>
+        <div className="info-banner warning-block">
+          <span className="icon">⚠️</span> {texts.disclaimer}
+        </div>
 
         {loading && <LoadingIndicator centered={true} />}
         {error && <p className="status-text error">{error}</p>}
 
-        {/* Filters */}
         <section className="control-card">
-          {/* City filter */}
-          <div className="filter-group">
-            {cityOptions.map((c) => (
+          {/* Filter 1: City */}
+          <div className="filter-row">
+            <div className="filter-wrap-container">
+              {cityOptions.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setSelectedCity(c)}
+                  className={`filter-btn ${c === selectedCity ? "active" : ""}`}
+                >
+                  {c === "all" ? "全部城市" : c}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Filter 2: Type */}
+          <div className="filter-row">
+            <div className="filter-wrap-container">
               <button
-                key={c}
-                onClick={() => setSelectedCity(c)}
-                className={`filter-btn ${c === selectedCity ? "active" : ""}`}
+                onClick={() => setSelectedType("all")}
+                className={`filter-btn ${
+                  selectedType === "all" ? "active" : ""
+                }`}
               >
-                {c === "all" ? "全部城市" : c}
+                全部類型
               </button>
-            ))}
+              {TYPES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setSelectedType(t)}
+                  className={`filter-btn ${t === selectedType ? "active" : ""}`}
+                >
+                  {t === "clinic"
+                    ? "診所"
+                    : t === "hospital"
+                    ? "醫院"
+                    : t === "pharmacy"
+                    ? "藥局"
+                    : t === "medical_aesthetic"
+                    ? "醫美"
+                    : t}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Type filter */}
-          <div className="filter-group">
-            <button
-              type="button"
-              onClick={() => setSelectedType("all")}
-              className={`filter-btn ${selectedType === "all" ? "active" : ""}`}
-            >
-              全部類型
-            </button>
-            {TYPES.map((t) => (
+          {/* Filter 3: Doses */}
+          <div className="filter-row">
+            <div className="filter-wrap-container">
               <button
-                key={t}
-                onClick={() => setSelectedType(t)}
-                className={`filter-btn ${t === selectedType ? "active" : ""}`}
+                onClick={() => setShowAllDoses(false)}
+                className={`filter-btn ${!showAllDoses ? "active" : ""}`}
               >
-                {TYPE_LABELS[t] || t}
+                常見劑量
               </button>
-            ))}
+              <button
+                onClick={() => setShowAllDoses(true)}
+                className={`filter-btn ${showAllDoses ? "active" : ""}`}
+              >
+                所有劑量
+              </button>
+            </div>
           </div>
 
-          {/* Dose display mode */}
-          <div className="filter-group">
-            <button
-              type="button"
-              onClick={() => setShowAllDoses(false)}
-              className={`filter-btn ${!showAllDoses ? "active" : ""}`}
-            >
-              常見 5 mg / 10 mg
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowAllDoses(true)}
-              className={`filter-btn ${showAllDoses ? "active" : ""}`}
-            >
-              顯示所有劑量
-            </button>
-          </div>
-
-          {/* Type warnings */}
           {selectedType === "pharmacy" && (
-            <div className="warning-block">{texts.pharmacyWarning}</div>
+            <div className="warning-block small">{texts.pharmacyWarning}</div>
           )}
           {selectedType === "hospital" && (
-            <div className="warning-block">{texts.hospitalWarning}</div>
+            <div className="warning-block small">{texts.hospitalWarning}</div>
           )}
 
-          {/* Keyword search */}
-          <input
-            placeholder="搜尋診所 / 地區 / 城市 / 類型"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="search-input"
-          />
+          <div className="search-wrapper">
+            <span className="search-icon">🔍</span>
+            <input
+              placeholder="搜尋地區、診所或藥局..."
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              className="search-input"
+            />
+          </div>
         </section>
 
-        {/* Result area */}
         {!loading && !error && (
           <>
             {isMobile ? (
@@ -278,18 +260,16 @@ function PricePage() {
                 onOpenReport={openReportModal}
               />
             ) : (
+              // 💡 這裡也移除了 expandedNoteId 相關 props
               <PriceTable
                 data={filteredData}
                 showAllDoses={showAllDoses}
-                expandedNoteId={expandedNoteId}
-                setExpandedNoteId={setExpandedNoteId}
                 onOpenReport={openReportModal}
               />
             )}
           </>
         )}
 
-        {/* Report modal (per-row) */}
         {reportTarget && (
           <PriceReportModal
             target={reportTarget}

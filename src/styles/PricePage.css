@@ -1,8 +1,31 @@
-/* ---------------- Page layout ---------------- */
+/* ---------- Animal Crossing Theme Variables ---------- */
+:root {
+  --ac-cream: #fffdf0;
+  --ac-cream-dark: #f0e6d2;
+  --ac-green: #78b159;
+  --ac-green-light: #e8f5e9;
+  --ac-brown: #7c6245;
+  --ac-brown-dark: #58432d;
+  --ac-yellow: #f8e286;
+  --ac-orange: #f09236;
+  --ac-teal: #2aa5a5;
+  --ac-paper: #ffffff;
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --shadow-hard: 4px 4px 0 rgba(124, 98, 69, 0.15);
+}
+
+/* Page Layout */
 .price-page-root {
   min-height: 100vh;
-  padding: 16px;
-  background: #f8fafc;
+  padding: 20px 16px;
+  background-color: var(--ac-cream);
+  font-family: "Nunito", "Varela Round", system-ui, sans-serif;
+  color: var(--ac-brown-dark);
+  background-image: radial-gradient(var(--ac-cream-dark) 15%, transparent 16%),
+    radial-gradient(var(--ac-cream-dark) 15%, transparent 16%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
 }
 
 .price-page-inner {
@@ -10,521 +33,359 @@
   margin: 0 auto;
 }
 
-/* ---------------- Status text ---------------- */
-.status-text {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #4b5563;
+/* Header Text */
+.page-header {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-.status-text.error {
-  color: #b91c1c;
+.page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ac-brown-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  background: var(--ac-yellow);
+  padding: 6px 20px;
+  border-radius: 999px;
+  border: 3px dashed var(--ac-orange);
+  transform: rotate(-1deg);
 }
 
-/* ---------------- Disclaimer / Warning ---------------- */
-.disclaimer-block {
-  margin-top: 8px;
-  margin-bottom: 12px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: #fef9c3;
-  color: #854d0e;
+.page-subtitle-text {
   font-size: 14px;
-  line-height: 1.7;
+  color: var(--ac-brown);
+  line-height: 1.5;
   font-weight: 600;
 }
 
+/* Info Banners */
 .warning-block {
-  margin-top: 8px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #fee2e2;
-  color: #991b1b;
+  margin: 12px 0;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: #fff;
+  border: 2px dashed #e17055;
+  color: #c0392b;
   font-size: 13px;
-  line-height: 1.6;
+  font-weight: 700;
+  line-height: 1.5;
+  box-shadow: var(--shadow-hard);
 }
 
-/* ---------------- Filter / Control card ---------------- */
+.warning-block.small {
+  background: #fff5f5;
+  padding: 10px;
+  border: 2px dashed #ffbca8;
+}
+
+/* ---------- Control Board ---------- */
 .control-card {
-  margin-top: 8px;
-  margin-bottom: 12px;
-  padding: 12px 14px 14px;
-  background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  background: var(--ac-paper);
+  border-radius: var(--radius-lg);
+  padding: 20px; /* 增加 padding */
+  border: 2px solid var(--ac-green);
+  box-shadow: var(--shadow-hard);
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+  position: relative;
 }
 
-.filter-group {
+/* Tape Decoration */
+.control-card::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 50px;
+  height: 18px;
+  background: rgba(200, 200, 200, 0.4);
+  transform: translateX(-50%) rotate(1deg);
+}
+
+/* Filter Row */
+.filter-row {
+  width: 100%;
+}
+
+/* Wrap Container (The buttons) */
+.filter-wrap-container {
   display: flex;
   flex-wrap: wrap;
+  gap: 10px; /* 增加間距 */
+  row-gap: 12px; /* 增加行距 */
   align-items: center;
-  gap: 6px;
+  justify-content: flex-start; /* 靠左對齊 */
 }
 
-.filter-label {
-  font-size: 13px;
-  color: #4b5563;
-}
-
-/* 共用 filter 按鈕 */
+/* Filter Buttons */
 .filter-btn {
   border-radius: 999px;
-  border: 1px solid #cbd5f5;
-  padding: 6px 10px;
-  font-size: 13px;
-  background: #ffffff;
-  color: #1e293b;
+  border: 2px solid var(--ac-green);
+  padding: 8px 16px; /* 增加一點內距讓按鈕好按 */
+  font-size: 14px;
+  font-weight: 700;
+  background: #fff;
+  color: var(--ac-green);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.05); /* 微微的陰影 */
+}
+
+.filter-btn:hover {
+  transform: translateY(-2px);
 }
 
 .filter-btn.active {
-  background: #0f766e;
-  border-color: #0f766e;
-  color: #f9fafb;
+  background: var(--ac-green);
+  color: #fff;
+  box-shadow: 0 2px 0 var(--ac-brown);
+  transform: translateY(0);
 }
 
-.filter-btn:hover:not(.active) {
-  background: #e5f3f1;
-}
-
-/* 搜尋輸入框 */
-.search-input {
+/* Search Input - 縮小寬度 */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 280px; /* 💡 限制最大寬度 */
   margin-top: 4px;
-  padding: 8px;
-  max-width: 260px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: var(--ac-teal);
+}
+
+.search-input {
   width: 100%;
-  border-radius: 8px;
-  border: 1px solid #cbd5f5;
+  padding: 10px 12px 10px 38px;
+  border-radius: 999px;
+  border: 2px solid var(--ac-teal);
   font-size: 14px;
+  font-family: inherit;
+  background: #f0fcfc;
+  outline: none;
+  color: var(--ac-brown-dark);
+  box-sizing: border-box; /* 確保 padding 不會撐爆寬度 */
 }
 
-/* ---------------- Table card (桌機版) ---------------- */
-.table-card {
-  margin-top: 8px;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 8px 8px 12px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+.search-input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(42, 165, 165, 0.15);
 }
 
-.table-scroll {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.price-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 720px;
-  font-size: 14px;
-  color: #0f172a;
-}
-
-.price-table th {
-  background: #f1f5f9;
-  font-weight: 600;
-  padding: 10px 6px;
-  border-bottom: 1px solid #e2e8f0;
-  white-space: nowrap;
-}
-
-.price-table td {
-  padding: 8px 6px;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: center;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.price-table td.col-city,
-.price-table td.col-type,
-.price-table td.col-clinic {
-  white-space: nowrap;
-}
-
-/* 桌機備註欄 */
-.price-table td.col-note {
-  white-space: normal;
-  text-align: left;
-  word-break: break-word;
-}
-
-.note-text {
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.note-toggle {
-  display: none;
-}
-
-.report-icon-btn {
-  cursor: pointer;
-  font-size: 14px;
-  color: #0f766e;
-  opacity: 0.8;
-  transition: opacity 0.15s ease;
-}
-
-.report-icon-btn:hover {
-  opacity: 1;
-}
-
-/* ---------------- 手機卡片版 ---------------- */
+/* ---------- Mobile Cards ---------- */
 .card-list {
-  margin-top: 10px;
+  margin-top: 16px;
 }
 
 .clinic-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 12px 14px;
-  margin-bottom: 12px;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.09);
+  background: var(--ac-paper);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 4px 0 #d0d0d0;
+  position: relative;
+  overflow: hidden;
+}
+
+.clinic-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: var(--ac-green);
+}
+
+.clinic-header {
+  margin-left: 10px;
 }
 
 .clinic-name {
-  font-weight: 600;
-  font-size: 15px;
-  color: #0f172a;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ac-brown-dark);
 }
 
 .clinic-meta {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 2px;
+  font-size: 13px;
+  color: var(--ac-brown);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-/* 價格 pills */
-.clinic-prices {
-  display: flex;
-  flex-wrap: wrap;
+/* ---------- Mobile Cards (部分更新) ---------- */
+
+/* ... 上面的 .clinic-card 樣式保持不變 ... */
+
+/* 替換原本的 .clinic-prices */
+.clinic-prices-grid {
+  margin-top: 12px;
+  margin-left: 10px; /* 與 header 對齊 */
+  display: grid;
+  /* 手機版強制雙欄，這樣比較好閱讀 */
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  font-size: 13px;
-  margin-top: 8px;
+}
+
+/* 這是新的價格小卡樣式 */
+.price-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 劑量靠左，價格靠右 */
+  background: var(--ac-green-light); /* 淺綠底 */
+  border: 1px solid var(--ac-green);
+  border-radius: 8px; /*稍微圓一點，不要太圓*/
+  padding: 6px 10px;
+  font-size: 14px;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 劑量標籤 */
+.dose-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ac-green); /* 深綠色文字 */
+  background: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 4px;
+  border: 1px solid rgba(120, 177, 89, 0.3);
+}
+
+/* 價格數字 */
+.price-value {
+  font-weight: 800;
+  color: var(--ac-brown-dark); /* 深咖啡色，閱讀性最高 */
+  font-family: "Nunito", sans-serif; /* 數字用英文圓體比較好看 */
+  letter-spacing: 0.5px;
+}
+
+/* ... 下面的 .clinic-note, .clinic-footer 樣式保持不變 ... */
+
+/* 針對極小螢幕的微調 (例如 iPhone SE) */
+@media (max-width: 360px) {
+  .clinic-prices-grid {
+    grid-template-columns: 1fr; /* 螢幕太小就變單欄 */
+  }
 }
 
 .price-box {
-  padding: 6px 10px;
-  background: #e8f8f4; /* 淡薄荷綠 */
-  border-left: 4px solid #0f766e; /* 主色的左側指示線 */
-  font-size: 14px;
-  color: #0f766e;
-  margin-bottom: 6px;
-  margin-right: 0;
+  background: var(--ac-green-light);
+  color: var(--ac-green-dark);
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  border: 1px dashed var(--ac-green);
 }
 
-/* 全劑量 grid */
-.dose-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 3px 10px;
-  font-size: 12px;
-  margin-top: 6px;
-}
-
-/* ---------------- 手機卡片：備註（重新設計） ---------------- */
 .clinic-note {
-  margin-top: 10px;
-  padding: 8px 10px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  margin: 12px 0 0 10px;
+  background: var(--ac-cream);
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px dotted var(--ac-brown);
+  font-size: 13px;
+  color: var(--ac-brown-dark);
 }
 
-.note-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 2px;
-}
-
-.note-text {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #64748b;
-  white-space: pre-wrap;
-}
-/* ---------------- 手機卡片 footer：協助更新固定右下角 ---------------- */
 .clinic-footer {
-  margin-top: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 2px dashed #eee;
   display: flex;
-  width: 100%; /* 確定佔滿整個卡片寬度 */
-}
-
-/* 更新日期如果有留在 footer 裡，放在左側顯示 */
-.clinic-updated {
-  font-size: 11px;
-  color: #6b7280;
-  align-self: center;
-}
-
-/* Footer row: left (date) + right (button) */
-.clinic-footer-row {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
+  justify-content: space-between;
 }
 
-/* Subtle updated date style */
 .updated-date {
-  font-size: 12px;
-  color: #94a3b8; /* slate-400 */
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
 }
-/* 右下角的小型協助更新按鈕 */
+
 .clinic-edit-btn {
-  margin-left: auto; /* ⭐ 關鍵：把按鈕推到最右邊 */
+  margin-left: auto;
+  background: var(--ac-yellow);
+  color: var(--ac-brown-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 2px solid var(--ac-orange);
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid #0f766e33;
-  background: #f0fdfa;
-  color: #0f766e;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  box-shadow: 2px 2px 0 var(--ac-brown);
 }
 
-.clinic-edit-btn:hover {
-  background: #ccfbf1;
-  border-color: #0f766e55;
+/* ---------- Desktop Table ---------- */
+.table-card {
+  background: var(--ac-paper);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  border: 2px solid var(--ac-brown);
+  box-shadow: var(--shadow-hard);
+  overflow-x: auto;
+}
+.price-table th {
+  background: var(--ac-green);
+  color: #fff;
+  padding: 10px;
+  white-space: nowrap;
+}
+.price-table td {
+  padding: 10px;
+  border-bottom: 2px dashed #eee;
+  color: var(--ac-brown-dark);
 }
 
-.clinic-edit-icon {
-  font-size: 12px;
-}
-.donate-block {
-  background: #f8fafc;
-  padding: 20px 16px;
-  border-radius: 12px;
-  text-align: center;
-  margin-top: 32px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-}
-
-.donate-text {
-  font-size: 14px;
-  line-height: 1.8;
-  color: #334155;
-  margin-bottom: 16px;
-}
-
-.donate-button {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #0f766e;
-  color: #ffffff;
-  font-weight: 600;
-  border-radius: 999px;
-  text-decoration: none;
-  transition: background-color 0.15s ease, transform 0.1s ease;
-}
-
-.donate-button:hover {
-  background: #0d5f59;
-  transform: scale(1.03);
-}
-
-.about-block {
-  margin-top: 18px;
-  padding-bottom: 30px;
-}
-
-.about-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #111827;
-}
-
-.about-text {
-  font-size: 13px;
-  color: #4b5563;
-  line-height: 1.7;
-}
-/* 協助更新 Modal 背景 */
+/* Modal Styles */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 2000;
+  padding: 16px;
 }
-
-/* Modal 卡片 */
 .modal-card {
-  background: #ffffff;
-  border-radius: 16px;
-  max-width: 520px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px;
   width: 100%;
-  padding: 20px 18px 18px;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+  max-width: 480px;
+  border: 4px solid var(--ac-teal);
+  box-shadow: 0 8px 0 rgba(42, 165, 165, 0.4);
 }
-
-/* 兩欄地區＋地址 */
-.modal-row-2 {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.modal-row-2 .modal-field {
-  flex: 1 1 0;
-}
-
-/* 劑量說明 */
-.modal-dose-header {
-  margin-top: 16px;
-  margin-bottom: 8px;
-}
-
-.modal-dose-header .modal-label {
-  font-size: 13px;
-  color: #64748b;
-}
-
-/* 劑量區：兩欄 grid */
 .modal-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 18px;
-  margin-bottom: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 @media (max-width: 640px) {
   .modal-grid {
     grid-template-columns: 1fr;
   }
-}
-
-/* 每一格：上 label，下 input */
-.modal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* 劑量小卡片 */
-.dose-field {
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  padding: 10px 12px;
-}
-
-/* label & input 共用樣式 */
-.modal-label {
-  font-size: 13px;
-  color: #475569;
-  font-weight: 600;
-}
-
-.modal-input {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 14px;
-  background: #ffffff;
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.modal-input:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
-}
-
-.modal-textarea {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 14px;
-  resize: vertical;
-  min-height: 72px;
-  box-sizing: border-box;
-}
-
-.modal-textarea:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
-}
-
-/* ---------------- RWD ---------------- */
-@media (max-width: 640px) {
-  .price-page-root {
-    padding: 12px;
+  .control-card {
+    padding: 14px;
   }
-
-  .page-title {
-    font-size: 20px;
-  }
-
-  .price-table th,
-  .price-table td {
-    font-size: 13px;
-    padding: 6px 4px;
-  }
-}
-
-.modal-actions {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.last-updated {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-/* Hidden by default (desktop) */
-.mobile-updated-date {
-  display: none;
-}
-
-/* Mobile only */
-@media (max-width: 640px) {
-  .mobile-updated-date {
-    display: block;
-    font-size: 11px;
-    color: #94a3b8; /* slate-400，低調 */
-    margin-top: 4px;
-    margin-bottom: 6px;
-  }
-}
-
-/* Simple CTA button on PricePage */
-.simple-report-btn {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: #0f766e;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  border: 1px solid #0f766e;
-  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-}
-
-.simple-report-btn:hover {
-  background: #115e59;
-  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.35);
-  transform: translateY(-1px);
 }

@@ -3,6 +3,9 @@ import React, { useEffect, useState } from "react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import { CITY_LABELS, TYPE_LABELS } from "../data/prices";
 import "../styles/PriceReportModal.css";
+// Ensure global theme variables are available if not imported in index.js
+import "../styles/PricePage.css";
+
 // Convert empty string to number or null
 const toNullableInt = (value) => {
   if (value === "" || value === null || value === undefined) return null;
@@ -66,7 +69,7 @@ function PriceReportModal({ target, onClose }) {
       !price12_5 &&
       !price15
     ) {
-      setError("請至少填寫一個劑量的價格。");
+      setError("請至少填寫一個劑量的價格喔 HOO！");
       return;
     }
 
@@ -110,7 +113,7 @@ function PriceReportModal({ target, onClose }) {
         throw new Error(`HTTP ${res.status}: ${text}`);
       }
 
-      alert("已送出協助更新，感謝你幫忙維護價格資料！");
+      alert("🎉 回報成功！狸克感謝你的付出！");
       onClose();
     } catch (err) {
       console.error("❌ 協助更新送出失敗：", err);
@@ -123,14 +126,16 @@ function PriceReportModal({ target, onClose }) {
   return (
     <div className="modal-backdrop" onClick={handleBackdropClick}>
       <div className="modal-card">
-        <h2 className="modal-title">協助更新價格資料</h2>
+        <h2 className="modal-title">📝 價格回報單</h2>
         {/* Low-key clinic info line */}
         <p
           style={{
             marginTop: "4px",
             marginBottom: "14px",
             fontSize: "13px",
-            color: "#6b7280",
+            color: "var(--ac-brown)",
+            textAlign: "center",
+            fontWeight: "600",
           }}
         >
           {cityLabel} / {target.district || "-"} / {target.clinic}（{typeLabel}
@@ -142,24 +147,32 @@ function PriceReportModal({ target, onClose }) {
           {/* District */}
           <div className="modal-row-2">
             <div className="modal-field">
-              <label className="modal-label">地區（選填）</label>
+              <label className="modal-label">📍 地區（選填）</label>
               <input
                 type="text"
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
                 className="modal-input"
+                placeholder="例如：信義區"
               />
             </div>
           </div>
 
           {/* Price Section Title */}
-          <div className="modal-dose-header">
-            <span className="modal-label">
-              價格（單次金額，NT$ 新台幣，至少填一格）
+          <div
+            style={{
+              marginBottom: "8px",
+              marginTop: "12px",
+              borderBottom: "1px dashed #ddd",
+              paddingBottom: "4px",
+            }}
+          >
+            <span className="modal-label" style={{ color: "var(--ac-teal)" }}>
+              💰 價格（NT$）
             </span>
           </div>
 
-          {/* Price Grid */}
+          {/* Price Grid (3 Columns) */}
           <div className="modal-grid">
             {[
               ["2.5 mg", price2_5, setPrice2_5],
@@ -171,22 +184,20 @@ function PriceReportModal({ target, onClose }) {
             ].map(([label, value, setter], idx) => (
               <div className="modal-field dose-field" key={idx}>
                 <label className="modal-label">{label}</label>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <span
-                    style={{
-                      marginRight: "6px",
-                      color: "#475569",
-                      fontSize: "13px",
-                    }}
-                  >
-                    NT$
-                  </span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <input
                     type="number"
                     value={value}
                     onChange={(e) => setter(e.target.value)}
                     className="modal-input"
-                    style={{ flex: 1 }}
+                    placeholder="-"
+                    style={{ flex: 1, padding: "4px" }}
                   />
                 </div>
               </div>
@@ -194,13 +205,14 @@ function PriceReportModal({ target, onClose }) {
           </div>
 
           {/* Note */}
-          <div className="modal-field">
-            <label className="modal-label">備註（選填）</label>
+          <div className="modal-field" style={{ marginTop: "12px" }}>
+            <label className="modal-label">🍃 備註（選填）</label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               className="modal-textarea"
+              placeholder="有什麼特別要注意的嗎？"
             />
           </div>
 
@@ -218,7 +230,7 @@ function PriceReportModal({ target, onClose }) {
             </button>
 
             <button type="submit" disabled={submitting} className="btn-primary">
-              {submitting ? "提交中…" : "提交協助更新"}
+              {submitting ? "傳送中…" : "確認回報"}
             </button>
           </div>
         </form>

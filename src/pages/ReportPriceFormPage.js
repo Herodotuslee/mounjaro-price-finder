@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import { CITY_LABELS } from "../data/prices";
+// Import main theme and specific page styles
+import "../styles/PricePage.css";
 import "../styles/ReportPriceFormPage.css";
 
 const INITIAL_FORM = {
@@ -60,11 +62,11 @@ function ReportPriceFormPage() {
     e.preventDefault();
     setMessage(null);
 
-    // 簡單必填檢查
+    // Validation
     if (!form.city || !form.clinic.trim()) {
       setMessage({
         type: "error",
-        text: "請至少填寫城市與診所 / 醫院 / 藥局 / 醫美診所名稱。",
+        text: "請記得填寫城市和診所名稱喔！",
       });
       return;
     }
@@ -79,7 +81,7 @@ function ReportPriceFormPage() {
     ) {
       setMessage({
         type: "error",
-        text: "請至少填寫一個劑量的價格（2.5 / 5 / 7.5 / 10 / 12.5 / 15 mg 任一即可）。",
+        text: "請至少告訴我一個劑量的價格吧 HOO！",
       });
       return;
     }
@@ -124,13 +126,13 @@ function ReportPriceFormPage() {
       setForm(INITIAL_FORM);
       setMessage({
         type: "success",
-        text: "感謝回報！資料已送出，會先進入回報列表，站長人工審核後才會更新到主表格。",
+        text: "回報成功！狸克會把資料收好，審核後就會更新囉！",
       });
     } catch (err) {
-      console.error("送出回報失敗：", err);
+      console.error("Submission failed:", err);
       setMessage({
         type: "error",
-        text: "送出資料時發生錯誤，請稍後再試，或聯絡站長協助。",
+        text: "傳送失敗了... 請稍後再試試看！",
       });
     } finally {
       setSubmitting(false);
@@ -138,30 +140,38 @@ function ReportPriceFormPage() {
   };
 
   return (
-    <div className="report-page-root">
-      <div className="report-page-inner">
+    <div className="price-page-root">
+      <div className="price-page-inner">
         {/* Header */}
         <header className="page-header">
-          <h1 className="page-title">回報表單</h1>
-          <p className="page-subtitle">
-            希望健康的體態是每個台灣人都能追求的權利，不再是遙不可及。
+          <h1 className="page-title">
+            <span className="title-icon">📮</span> 價格回報箱
+          </h1>
+          <p className="page-subtitle-text">
+            健康的體態是大家共同的目標！
+            <br />
+            如果你知道哪裡有合理的價格，歡迎投遞情報喔！
           </p>
         </header>
+
+        {/* Info Block */}
         <div className="report-info-block">
           <p className="report-info-text">
-            感謝你願意協助回報「合理價格」的猛健樂價格促進善的循環，這個網站是靠大家一起維護的民間資訊整理。當然，價格並非唯一因素，如果有推薦好醫師也歡迎告知！
+            感謝你願意分享情報！這個網站是靠大家的善意一起維護的。
+            <br />
+            除了價格，如果有推薦的好醫師，也歡迎在備註裡告訴大家喔！
           </p>
           <ul className="report-info-list">
             <li>
-              回報的資料<strong>不會直接顯示</strong>
-              在主表格中，會先進入回報列表，由站長人工審核（排除重複、錯字、明顯異常價格）後再更新。
+              為了保持資訊正確，回報的資料會先由站長人工確認，不會馬上顯示在主頁面喔。
             </li>
             <li>
-              如果你覺得某位醫師特別細心、溝通良好，也非常歡迎在「備註」欄位簡單寫下推薦與看診經驗，幫助更多人找到好醫師。
+              如果你覺得醫師很細心、對GLP-1很了解，都可以在備註裡幫他們加分！
             </li>
           </ul>
         </div>
 
+        {/* Message Banner */}
         {message && (
           <div
             className={`report-message ${
@@ -174,122 +184,126 @@ function ReportPriceFormPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="report-form">
-          {/* 城市 */}
+        {/* Form Card */}
+        <form onSubmit={handleSubmit} className="report-form-card">
+          {/* City */}
           <div className="form-field">
-            <label className="form-label">城市（必填）</label>
-            <select
-              value={form.city}
-              onChange={handleChange("city")}
-              className="form-input"
-            >
-              {CITY_OPTIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c === "" ? "請選擇城市" : c}
-                </option>
-              ))}
-            </select>
+            <label className="form-label">📍 城市（必填）</label>
+            <div className="select-wrapper">
+              <select
+                value={form.city}
+                onChange={handleChange("city")}
+                className="form-input"
+              >
+                {CITY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c === "" ? "請選擇..." : c}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* 地區 */}
+          {/* District */}
           <div className="form-field">
-            <label className="form-label">區域 / 行政區（選填）</label>
+            <label className="form-label">🏠 地區（選填）</label>
             <input
               type="text"
               value={form.district}
               onChange={handleChange("district")}
-              placeholder="例如：大安、信義、新莊、楠梓…"
+              placeholder="例如：大安區、楠梓區..."
               className="form-input"
             />
           </div>
 
-          {/* 診所 / 醫院 / 藥局 / 醫美診所 名稱 */}
+          {/* Clinic Name */}
           <div className="form-field">
-            <label className="form-label">
-              診所 / 醫院 / 藥局 / 醫美診所名稱（必填）
-            </label>
+            <label className="form-label">🏥 名稱（必填）</label>
             <input
               type="text"
               value={form.clinic}
               onChange={handleChange("clinic")}
-              placeholder="請填寫完整名稱，避免只寫縮寫或暱稱"
+              placeholder="請填寫完整名稱喔！"
               className="form-input"
             />
           </div>
 
-          {/* 類型 */}
+          {/* Type Radio Buttons */}
           <div className="form-field">
-            <label className="form-label">類型</label>
-            <div className="type-options">
+            <label className="form-label">🏷️ 類型</label>
+            <div className="type-options-container">
               {TYPE_OPTIONS.map((t) => (
-                <label key={t.value} className="type-option">
+                <label
+                  key={t.value}
+                  className={`type-option-btn ${
+                    form.type === t.value ? "active" : ""
+                  }`}
+                >
                   <input
                     type="radio"
                     name="type"
                     value={t.value}
                     checked={form.type === t.value}
                     onChange={handleChange("type")}
+                    className="hidden-radio"
                   />
-                  <span>{t.label}</span>
+                  {t.label}
                 </label>
               ))}
             </div>
           </div>
 
-          {/* ⭐ 價格區塊（重點美化） */}
-          <div className="price-section">
+          {/* Price Section */}
+          <div className="price-section-card">
             <div className="price-section-header">
-              <div className="price-section-title">價格（至少填一格）</div>
+              <div className="price-section-title">💰 價格情報</div>
               <div className="price-section-subtitle">
-                請填寫單次施打自費金額，單位：新台幣。
+                請填寫單次費用 (NT$)，至少填一格喔！
               </div>
             </div>
 
-            <div className="price-grid">
-              {PRICE_FIELDS.map(({ name, label, placeholder }) => (
-                <div key={name} className="price-field">
-                  <label className="price-label" htmlFor={name}>
+            <div className="price-input-grid">
+              {PRICE_FIELDS.map(({ name, label }) => (
+                <div key={name} className="price-input-box">
+                  <label className="price-mini-label" htmlFor={name}>
                     {label}
                   </label>
-                  <div className="price-input-row">
-                    <span className="price-prefix">NT$</span>
-                    <input
-                      id={name}
-                      type="text"
-                      inputMode="numeric"
-                      value={form[name]}
-                      onChange={handleChange(name)}
-                      className="price-input"
-                      placeholder={placeholder}
-                    />
-                  </div>
+                  <input
+                    id={name}
+                    type="number"
+                    value={form[name]}
+                    onChange={handleChange(name)}
+                    className="price-mini-input"
+                    placeholder="-"
+                  />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 備註 */}
+          {/* Note */}
           <div className="form-field">
-            <label className="form-label">備註（選填）</label>
+            <label className="form-label">📝 備註（選填）</label>
             <textarea
               value={form.note}
               onChange={handleChange("note")}
               rows={3}
               className="form-textarea"
+              placeholder="有什麼想補充的嗎？"
             />
           </div>
 
-          {/* 送出按鈕 */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={submitting}
             className="report-submit-btn"
           >
-            {submitting ? "送出中…" : "送出回報"}
+            {submitting ? "傳送中..." : "投遞情報"}
           </button>
 
           <p className="report-submit-note">
-            資料送出後不會直接更新主表格，會先進入回報列表，由站長不定期人工檢查、去除重複與異常資料後再更新。
+            再次感謝你的熱心！你的情報會幫助到很多島民喔！
           </p>
         </form>
       </div>

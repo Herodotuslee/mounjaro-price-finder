@@ -12,12 +12,14 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="nav-container">
+        {/* Header: Brand + Mobile Toggle */}
         <div className="nav-header-row">
           <NavLink to="/" className="nav-brand" onClick={closeMenu}>
-            台灣猛健樂資訊網
+            <span className="brand-icon">🍃</span>
+            {/* 更改網站名稱 */}
+            <span className="brand-text">猛健樂森友會</span>
           </NavLink>
 
-          {/* Mobile hamburger */}
           <button
             type="button"
             className="nav-toggle"
@@ -30,7 +32,7 @@ function Navbar() {
           </button>
         </div>
 
-        {/* Main links */}
+        {/* Main Navigation Links */}
         <div className={`nav-main ${isMenuOpen ? "open" : ""}`}>
           <ul className="nav-links">
             <li>
@@ -71,31 +73,34 @@ function Navbar() {
           </ul>
         </div>
 
-        {/* LINE + Donate (desktop right / mobile bottom-right floating) */}
+        {/* Action Buttons (LINE + Donate) */}
         <div className="nav-actions">
+          {/* LINE Button */}
           <a
             href="https://line.me/ti/g2/14wNaS4K1nmA7ytMa8pgzTLuslICubxDFVdjuQ"
             target="_blank"
             rel="noopener noreferrer"
-            className="nav-line-link"
+            className="nav-btn nav-line-link"
             onClick={closeMenu}
           >
             <img
               src="/icons8-line-me.svg"
               alt="LINE"
-              className="nav-line-icon"
+              className="nav-icon-img"
             />
-            加入 LINE 群組
+            <span>加入群組</span>
           </a>
 
+          {/* Donate Button */}
           <a
             href="https://buymeacoffee.com/holaalbertc"
             target="_blank"
             rel="noopener noreferrer"
-            className="nav-coffee-link"
+            className="nav-btn nav-coffee-link"
             onClick={closeMenu}
           >
-            <img src="/image/bmc-logo.png" alt="請我喝杯咖啡" />
+            <span className="nav-icon-emoji">☕</span>
+            <span>請喝咖啡</span>
           </a>
         </div>
       </div>

@@ -1,37 +1,15 @@
-/* ---------------- Page layout ---------------- */
-.report-page-root {
-  min-height: 100vh;
-  padding: 20px;
-  background: #f8fafc;
-}
+/* ---------- Report Form Styles ---------- */
 
-.report-page-inner {
-  max-width: 720px;
-  margin: 0 auto;
-}
+/* Reuse variables from PricePage.css */
 
-/* ---------------- Header ---------------- */
-.report-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: #0f172a;
-}
-
-.report-subtitle {
-  margin-bottom: 12px;
-  font-size: 13px;
-  color: #64748b;
-}
-
-/* ---------------- Info block ---------------- */
+/* Info Block (Pinned Note) */
 .report-info-block {
-  background: #f0f7ff; /* super light blue */
-  border: 1px solid #bfdbfe; /* soft blue border */
-  padding: 16px 18px;
-  border-radius: 12px;
-  color: #0f172a; /* dark readable text */
-  margin-bottom: 20px;
+  background: var(--ac-cream);
+  border: 1px dotted var(--ac-brown);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 24px;
+  color: var(--ac-brown-dark);
 }
 
 .report-info-text {
@@ -41,210 +19,247 @@
 }
 
 .report-info-list {
-  padding-left: 20px;
   margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ac-brown);
 }
 
 .report-info-list li {
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-/* ---------------- Message ---------------- */
-.report-message {
-  margin-bottom: 16px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.report-message-success {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.report-message-error {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-/* ---------------- Form base ---------------- */
-.report-form {
+/* ---------- Main Form Card (NookPhone Style) ---------- */
+.report-form-card {
   background: #ffffff;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  border: 4px solid var(--ac-teal);
+  box-shadow: 0 8px 0 rgba(42, 165, 165, 0.2);
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
+/* Form Fields */
 .form-field {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .form-label {
   display: block;
   font-size: 14px;
-  margin-bottom: 4px;
-  color: #0f172a;
+  font-weight: 700;
+  color: var(--ac-brown);
+  margin-bottom: 6px;
 }
 
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 8px;
+  padding: 10px 12px;
   font-size: 14px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  border: 2px solid #ccc;
+  background: #f9f9f9;
+  color: var(--ac-brown-dark);
+  font-family: inherit;
+  transition: 0.2s;
   box-sizing: border-box;
+  outline: none;
 }
 
-.form-textarea {
-  resize: vertical;
+.form-input:focus,
+.form-textarea:focus {
+  border-color: var(--ac-teal);
+  background: #fff;
 }
 
-/* ---------------- Type options ---------------- */
-.type-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  font-size: 14px;
-  color: #0f172a;
+/* Custom Select Arrow */
+.select-wrapper {
+  position: relative;
 }
-
-.type-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ac-teal);
+  font-size: 12px;
+  pointer-events: none;
+}
+.form-input select {
+  appearance: none;
   cursor: pointer;
 }
 
-/* ---------------- Price section ---------------- */
-.price-section {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+/* Radio Buttons (Pills) */
+.type-options-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hidden-radio {
+  display: none;
+}
+
+.type-option-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--ac-green);
+  background: #fff;
+  color: var(--ac-green);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-option-btn:hover {
+  transform: translateY(-2px);
+  background: var(--ac-green-light);
+}
+
+.type-option-btn.active {
+  background: var(--ac-green);
+  color: #fff;
+  box-shadow: 0 2px 0 var(--ac-brown);
+}
+
+/* ---------- Price Section (Sticker Look) ---------- */
+.price-section-card {
+  background: var(--ac-cream);
+  border: 2px dashed var(--ac-brown);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 24px 0;
 }
 
 .price-section-header {
-  margin-bottom: 10px;
+  text-align: center;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 8px;
 }
 
 .price-section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ac-teal);
 }
 
 .price-section-subtitle {
   font-size: 12px;
-  color: #6b7280;
-  margin-top: 2px;
+  color: #888;
+  margin-top: 4px;
 }
 
-/* Two-column grid (auto to one column on mobile) */
-.price-grid {
+/* Price Grid */
+.price-input-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-@media (max-width: 640px) {
-  .price-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 480px) {
+  .price-input-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Each dose card */
-.price-field {
-  background: #ffffff;
+.price-input-box {
+  background: #fff;
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  padding: 10px 10px 8px;
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
 }
 
-.price-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 6px;
+.price-mini-label {
   display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ac-brown);
+  margin-bottom: 4px;
 }
 
-.price-input-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.price-prefix {
+.price-mini-input {
+  width: 100%;
+  border: none;
+  background: #f0fcfc;
+  padding: 6px;
+  border-radius: 6px;
+  text-align: center;
   font-size: 13px;
-  color: #64748b;
-}
-
-.price-input {
-  flex: 1;
-  padding: 6px 8px;
-  font-size: 13px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  color: var(--ac-brown-dark);
+  font-weight: 600;
   box-sizing: border-box;
 }
 
-.price-input:focus {
-  border-color: #0f766e;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.12);
+.price-mini-input:focus {
+  background: #e0fbfb;
+  outline: 1px solid var(--ac-teal);
 }
 
-.price-hint {
-  margin-top: 4px;
-  font-size: 11px;
-  color: #9ca3af;
-}
-
-/* ---------------- Submit button ---------------- */
+/* ---------- Submit Button ---------- */
 .report-submit-btn {
   width: 100%;
-  padding: 10px;
+  padding: 14px;
   border-radius: 999px;
-  border: 1px solid #0d5f59;
-  font-size: 15px;
-  font-weight: 600;
+  background: var(--ac-teal);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
   cursor: pointer;
-  background: #0f766e;
-  color: #ffffff;
-  transition: background 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
+  margin-top: 8px;
+  box-shadow: 0 4px 0 #1e7e7e;
+  transition: transform 0.1s;
 }
 
-.report-submit-btn:hover:enabled {
-  background: #0d5f59;
-  transform: translateY(-1px);
+.report-submit-btn:hover {
+  background: #2cbdbd;
 }
 
-.report-submit-btn:disabled {
-  opacity: 0.65;
-  cursor: default;
+.report-submit-btn:active {
+  transform: translateY(4px);
   box-shadow: none;
 }
 
-.report-submit-note {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #0f766e;
-  text-align: center;
-  line-height: 1.5;
+.report-submit-btn:disabled {
+  background: #ccc;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
 }
 
-/* ---------------- RWD ---------------- */
-@media (max-width: 640px) {
-  .report-page-root {
-    padding: 14px;
-  }
+.report-submit-note {
+  margin-top: 16px;
+  font-size: 12px;
+  text-align: center;
+  color: #94a3b8;
+}
 
-  .report-title {
-    font-size: 20px;
-  }
+/* Messages */
+.report-message {
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.report-message-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.report-message-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
 }

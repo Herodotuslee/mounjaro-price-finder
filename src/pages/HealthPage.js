@@ -1,134 +1,92 @@
 // src/pages/HealthPage.js
 import React from "react";
 import healthSections from "../data/healthSections.json";
+// Import shared theme and specific styles
+import "../styles/PricePage.css";
+import "../styles/HealthPage.css";
 
 function HealthPage() {
-  // RPG-like quest color styles for the first three sections
-  const questColors = [
-    {
-      // Main quest - orange
-      bg: "#fff7ed",
-      text: "#b45309",
-      border: "#f97316",
-    },
-    {
-      // Long-term challenge - blue
-      bg: "#eff6ff",
-      text: "#1e40af",
-      border: "#3b82f6",
-    },
-    {
-      // Advanced training - purple
-      bg: "#faf5ff",
-      text: "#6b21a8",
-      border: "#a855f7",
-    },
-  ];
+  // Helper to determine style class based on index
+  const getSectionClass = (index) => {
+    if (index === 0) return "theme-orange"; // Main Quest
+    if (index === 1) return "theme-blue"; // Long-term
+    if (index === 2) return "theme-purple"; // Advanced
+    return "theme-general"; // Others
+  };
+
+  // Helper for Section Icons
+  const getSectionIcon = (index) => {
+    if (index === 0) return "🎒";
+    if (index === 1) return "✈️";
+    if (index === 2) return "🔮";
+    return "📋";
+  };
 
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: "0 auto" }}>
-      {/* Header */}
-      <header className="page-header">
-        <h1 className="page-title">猛健樂健康任務指南</h1>
-        <p className="page-subtitle">
-          以下整理一些常見的健康任務與建議，幫助你在使用猛健樂的過程中達成最佳效果。
-        </p>
-      </header>
+    <div className="price-page-root">
+      <div className="price-page-inner">
+        {/* --- Header --- */}
+        <header className="page-header">
+          <h1 className="page-title">
+            <span className="title-icon">🍎</span> 健康任務指南
+          </h1>
+          <p className="page-subtitle-text">
+            這裡整理了島民生活的健康任務。
+            <br />
+            完成這些挑戰，讓你的減重旅程更順利喔！
+          </p>
+        </header>
 
-      {/* Global warning banner */}
-      <div className="info-banner info-banner-warning">
-        ⚠️
-        警語：以下僅供無特殊疾病需求的人參考，若有特殊需求請以醫師、營養師為主。
-        本頁內容為一般健康資訊，並不構成醫療或營養處方。
+        {/* --- Warning Banner --- */}
+        <div className="info-banner warning-block">
+          <span className="icon">⚠️</span>
+          <strong>狸克提醒：</strong>{" "}
+          以下內容僅供參考，若有特殊疾病或需求，請務必聽從醫生與營養師的專業指示
+          HOO！
+        </div>
+
+        {/* --- Sections Loop --- */}
+        {healthSections.map((section, index) => {
+          const themeClass = getSectionClass(index);
+          const icon = getSectionIcon(index);
+
+          return (
+            <section
+              key={section.title}
+              className={`health-section ${themeClass}`}
+            >
+              {/* Section Header (Looks like a Nook Miles Card Header) */}
+              <div className="health-section-header">
+                <span className="section-icon">{icon}</span>
+                <h2 className="section-title">{section.title}</h2>
+              </div>
+
+              {/* Task Items (Accordions) */}
+              <div className="health-tasks-list">
+                {section.items.map((item, idx) => (
+                  <details key={idx} className="task-card">
+                    <summary className="task-summary">
+                      <span className="task-bullet">📌</span>
+                      {item.q}
+                    </summary>
+                    <div className="task-content">
+                      <p className="task-answer">{item.a}</p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+
+        {/* --- Footer Disclaimer --- */}
+        <div className="health-footer-note">
+          <p>
+            📝 本人非營養學專業，以上內容多為一般健康概念整理。
+            若有慢性病、正在用藥或特殊狀況，請務必與醫師、營養師討論後再做調整。
+          </p>
+        </div>
       </div>
-
-      {/* Sections from JSON */}
-      {healthSections.map((section, index) => {
-        const isQuest = index < 3;
-
-        // Base style for all section titles
-        const baseTitleStyle = {
-          fontSize: 18,
-          marginBottom: 8,
-        };
-
-        // Default style for normal sections (non-quest)
-        let titleStyle = {
-          ...baseTitleStyle,
-          borderLeft: "4px solid #0f766e",
-          paddingLeft: 8,
-          color: "#0f172a",
-          fontWeight: 600,
-        };
-
-        // Override style for first three sections with RPG quest colors
-        if (isQuest) {
-          const colorSet = questColors[index];
-
-          titleStyle = {
-            ...baseTitleStyle,
-            background: colorSet.bg,
-            color: colorSet.text,
-            borderLeft: `4px solid ${colorSet.border}`,
-            padding: "6px 8px",
-            borderRadius: 6,
-            fontWeight: 700,
-          };
-        }
-
-        return (
-          <div key={section.title} style={{ marginBottom: 24 }}>
-            <h2 style={titleStyle}>{section.title}</h2>
-
-            {section.items.map((item, idx) => (
-              <details
-                key={idx}
-                style={{
-                  marginBottom: 8,
-                  borderRadius: 6,
-                  border: "1px solid #e5e7eb",
-                  padding: "8px 12px",
-                  background: "#ffffff",
-                }}
-              >
-                <summary
-                  style={{
-                    cursor: "pointer",
-                    fontWeight: 500,
-                    listStyle: "none",
-                  }}
-                >
-                  {item.q}
-                </summary>
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    color: "#374151",
-                    whiteSpace: "pre-line", // keep line breaks from JSON
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {item.a}
-                </div>
-              </details>
-            ))}
-          </div>
-        );
-      })}
-
-      {/* Footer note */}
-      <p
-        style={{
-          marginTop: 8,
-          fontSize: 13,
-          color: "#6b7280",
-          lineHeight: 1.7,
-        }}
-      >
-        本人非營養學專業，以上內容多為一般健康概念整理，可能有不足或錯誤之處，歡迎指正。
-        若有慢性病、正在用藥或特殊狀況，請務必與醫師、營養師討論後再做調整。
-      </p>
     </div>
   );
 }
