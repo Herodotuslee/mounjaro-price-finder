@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import LoadingIndicator from "../components/LoadingIndicator";
-import useIsMobile from "../hooks/useIsMobile";
+// import useIsMobile from "../hooks/useIsMobile";
 // Import shared theme variables
 import "../styles/PricePage.css";
 // Import specific threads page styles
@@ -16,7 +16,7 @@ function ThreadsPage() {
   const [selectedTag, setSelectedTag] = useState(null);
 
   const navigate = useNavigate();
-  const isMobile = useIsMobile(640);
+  // const isMobile = useIsMobile(640);
 
   // Load articles from Supabase
   useEffect(() => {
