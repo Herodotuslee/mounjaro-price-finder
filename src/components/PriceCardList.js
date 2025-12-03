@@ -11,6 +11,17 @@ function PriceCardList({ data, showAllDoses, onOpenReport }) {
     );
   }
 
+  // 提取一個小組件或是 helper function 來渲染單個價格項目，讓程式碼更乾淨
+  const renderPriceItem = (dose, price) => {
+    if (!price || price <= 0) return null;
+    return (
+      <div className="price-item">
+        <span className="dose-label">{dose}</span>
+        <span className="price-value">${price}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="card-list">
       {data.map((row) => (
@@ -28,40 +39,23 @@ function PriceCardList({ data, showAllDoses, onOpenReport }) {
             </div>
           </div>
 
-          {/* Prices Grid */}
-          <div className="clinic-prices">
-            {/* 💡 修改這裡：增加 > 0 的判斷，過濾掉價格為 0 或 null 的項目 */}
+          {/* Prices Grid - 結構改為 Grid */}
+          <div className="clinic-prices-grid">
             {showAllDoses ? (
               // 顯示所有劑量
               <>
-                {row.price2_5mg > 0 && (
-                  <div className="price-box">2.5mg : {row.price2_5mg}</div>
-                )}
-                {row.price5mg > 0 && (
-                  <div className="price-box">5mg : {row.price5mg}</div>
-                )}
-                {row.price7_5mg > 0 && (
-                  <div className="price-box">7.5mg : {row.price7_5mg}</div>
-                )}
-                {row.price10mg > 0 && (
-                  <div className="price-box">10mg : {row.price10mg}</div>
-                )}
-                {row.price12_5mg > 0 && (
-                  <div className="price-box">12.5mg : {row.price12_5mg}</div>
-                )}
-                {row.price15mg > 0 && (
-                  <div className="price-box">15mg : {row.price15mg}</div>
-                )}
+                {renderPriceItem("2.5mg", row.price2_5mg)}
+                {renderPriceItem("5mg", row.price5mg)}
+                {renderPriceItem("7.5mg", row.price7_5mg)}
+                {renderPriceItem("10mg", row.price10mg)}
+                {renderPriceItem("12.5mg", row.price12_5mg)}
+                {renderPriceItem("15mg", row.price15mg)}
               </>
             ) : (
               // 只顯示常見劑量
               <>
-                {row.price5mg > 0 && (
-                  <div className="price-box">5mg : {row.price5mg}</div>
-                )}
-                {row.price10mg > 0 && (
-                  <div className="price-box">10mg : {row.price10mg}</div>
-                )}
+                {renderPriceItem("5mg", row.price5mg)}
+                {renderPriceItem("10mg", row.price10mg)}
               </>
             )}
           </div>
@@ -73,7 +67,7 @@ function PriceCardList({ data, showAllDoses, onOpenReport }) {
             </div>
           )}
 
-          {/* Footer: Date (Left) and Button (Right) */}
+          {/* Footer */}
           <div className="clinic-footer">
             <div className="updated-date">
               {row.last_updated ? `更新於: ${row.last_updated}` : ""}

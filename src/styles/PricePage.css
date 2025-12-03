@@ -228,12 +228,60 @@
   gap: 6px;
 }
 
-.clinic-prices {
+/* ---------- Mobile Cards (部分更新) ---------- */
+
+/* ... 上面的 .clinic-card 樣式保持不變 ... */
+
+/* 替換原本的 .clinic-prices */
+.clinic-prices-grid {
   margin-top: 12px;
-  padding-left: 10px;
-  display: flex;
-  flex-wrap: wrap;
+  margin-left: 10px; /* 與 header 對齊 */
+  display: grid;
+  /* 手機版強制雙欄，這樣比較好閱讀 */
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+/* 這是新的價格小卡樣式 */
+.price-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 劑量靠左，價格靠右 */
+  background: var(--ac-green-light); /* 淺綠底 */
+  border: 1px solid var(--ac-green);
+  border-radius: 8px; /*稍微圓一點，不要太圓*/
+  padding: 6px 10px;
+  font-size: 14px;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 劑量標籤 */
+.dose-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ac-green); /* 深綠色文字 */
+  background: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 4px;
+  border: 1px solid rgba(120, 177, 89, 0.3);
+}
+
+/* 價格數字 */
+.price-value {
+  font-weight: 800;
+  color: var(--ac-brown-dark); /* 深咖啡色，閱讀性最高 */
+  font-family: "Nunito", sans-serif; /* 數字用英文圓體比較好看 */
+  letter-spacing: 0.5px;
+}
+
+/* ... 下面的 .clinic-note, .clinic-footer 樣式保持不變 ... */
+
+/* 針對極小螢幕的微調 (例如 iPhone SE) */
+@media (max-width: 360px) {
+  .clinic-prices-grid {
+    grid-template-columns: 1fr; /* 螢幕太小就變單欄 */
+  }
 }
 
 .price-box {
