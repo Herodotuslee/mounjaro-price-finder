@@ -1,123 +1,142 @@
 // src/components/PriceTable.js
 import React from "react";
-import {
-  getCanonicalTypeCode,
-  formatPrice,
-  formatLastUpdated,
-} from "../utils/priceHelpers";
-import { DOSE_COLUMNS, COMMON_DOSES } from "../utils/doseConfig";
-import { CITY_LABELS, TYPE_LABELS } from "../data/prices";
-import { FaChevronUp, FaChevronDown, FaRegEdit } from "react-icons/fa";
+import "../styles/PricePage.css";
 
-function PriceTable({
-  data,
-  showAllDoses,
-  expandedNoteId,
-  setExpandedNoteId,
-  onOpenReport,
-}) {
-  // Determine which dose columns should be displayed
-  const activeDoseColumns = showAllDoses
-    ? DOSE_COLUMNS
-    : DOSE_COLUMNS.filter((d) => COMMON_DOSES.includes(d.label));
+// Format last_updated to date-only
+function formatLastUpdated(value) {
+  if (!value) return "";
+  return value.slice(0, 10);
+}
 
-  const totalColumns = 4 + activeDoseColumns.length + 3;
+function PriceTable({ data, showAllDoses, onOpenReport }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="table-card">
+        <div
+          style={{
+            padding: "20px",
+            textAlign: "center",
+            color: "var(--ac-brown)",
+          }}
+        >
+          沒有找到符合的資料...
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <section className="table-card">
+    <div className="table-card">
       <div className="table-scroll">
         <table className="price-table">
           <thead>
             <tr>
               <th>城市</th>
               <th>地區</th>
-              <th>類型</th>
               <th>名稱</th>
-
-              {activeDoseColumns.map((dose) => (
-                <th key={dose.key}>{dose.label}</th>
-              ))}
-
+              <th>類型</th>
+              {showAllDoses ? (
+                <>
+                  <th>2.5mg</th>
+                  <th>5mg</th>
+                  <th>7.5mg</th>
+                  <th>10mg</th>
+                  <th>12.5mg</th>
+                  <th>15mg</th>
+                </>
+              ) : (
+                <>
+                  <th>5mg</th>
+                  <th>10mg</th>
+                </>
+              )}
               <th>備註</th>
-              <th>更新日期</th>
-              <th>協助更新</th>
+              <th>協助更新</th> {/* 按鈕 */}
+              <th>更新日期</th> {/* 日期獨立一格 */}
             </tr>
           </thead>
 
           <tbody>
-            {data.map((item, index) => {
-              const typeCode = getCanonicalTypeCode(item.type);
-              const lastUpdatedText = formatLastUpdated(item.last_updated);
-              const note = item.note || "-";
-              const isExpanded = expandedNoteId === item.id;
+            {data.map((row) => (
+              <tr key={row.id}>
+                <td className="col-city" style={{ fontWeight: 700 }}>
+                  {row.city}
+                </td>
 
-              return (
-                <tr key={`${item.id}-${index}-row`}>
-                  <td>{CITY_LABELS[item.city] || item.city || "-"}</td>
-                  <td>{item.district || "-"}</td>
-                  <td>{TYPE_LABELS[typeCode] || "診所"}</td>
-                  <td>{item.clinic}</td>
+                <td className="col-district">{row.district}</td>
 
-                  {activeDoseColumns.map((dose) => (
-                    <td key={dose.key}>{formatPrice(item[dose.key]) || "-"}</td>
-                  ))}
-
-                  <td
-                    className={`col-note ${
-                      isExpanded ? "note-expanded" : "note-collapsed"
-                    }`}
-                  >
-                    <div className="note-text">{note}</div>
-
-                    {item.note && item.note.length > 30 && (
-                      <button
-                        type="button"
-                        className="note-toggle"
-                        onClick={() =>
-                          setExpandedNoteId(isExpanded ? null : item.id)
-                        }
-                      >
-                        {isExpanded ? (
-                          <FaChevronUp className="note-icon" />
-                        ) : (
-                          <FaChevronDown className="note-icon" />
-                        )}
-                      </button>
-                    )}
-                  </td>
-
-                  <td>
-                    {lastUpdatedText && (
-                      <span className="last-updated">{lastUpdatedText}</span>
-                    )}
-                  </td>
-
-                  <td>
-                    <FaRegEdit
-                      className="report-icon-btn"
-                      onClick={() => onOpenReport(item)}
-                      title="編輯 / 協助更新此筆資料"
-                      style={{ cursor: "pointer" }}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-
-            {data.length === 0 && (
-              <tr>
                 <td
-                  colSpan={totalColumns}
-                  style={{ textAlign: "center", padding: "12px" }}
+                  className="col-clinic"
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "14px",
+                    lineHeight: 1.4,
+                  }}
                 >
-                  目前沒有符合條件的資料。
+                  {row.clinic}
+                </td>
+
+                <td style={{ fontSize: "13px", color: "#666" }}>
+                  {row.type === "hospital"
+                    ? "醫院"
+                    : row.type === "pharmacy"
+                    ? "藥局"
+                    : "診所"}
+                </td>
+
+                {showAllDoses ? (
+                  <>
+                    <td>{row.price2_5mg || "-"}</td>
+                    <td>{row.price5mg || "-"}</td>
+                    <td>{row.price7_5mg || "-"}</td>
+                    <td>{row.price10mg || "-"}</td>
+                    <td>{row.price12_5mg || "-"}</td>
+                    <td>{row.price15mg || "-"}</td>
+                  </>
+                ) : (
+                  <>
+                    <td
+                      style={{ fontWeight: 700, color: "var(--ac-green-dark)" }}
+                    >
+                      {row.price5mg || "-"}
+                    </td>
+                    <td
+                      style={{ fontWeight: 700, color: "var(--ac-green-dark)" }}
+                    >
+                      {row.price10mg || "-"}
+                    </td>
+                  </>
+                )}
+
+                <td className="col-note">{row.note || ""}</td>
+
+                {/* 更新按鈕獨立一格 */}
+                <td>
+                  <button
+                    className="report-icon-btn"
+                    onClick={() => onOpenReport(row)}
+                    title="協助更新價格"
+                  >
+                    ✎
+                  </button>
+                </td>
+
+                {/* 日期獨立一格 */}
+                <td
+                  style={{
+                    fontSize: "12px",
+                    color: "#777",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {row.last_updated ? formatLastUpdated(row.last_updated) : ""}
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
   );
 }
 
