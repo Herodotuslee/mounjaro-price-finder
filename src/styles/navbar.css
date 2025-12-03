@@ -34,24 +34,27 @@
 .nav-header-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  /* Ensure header row takes enough space but allows shrink on mobile if needed */
-  flex-shrink: 0;
+  gap: 12px;
+  /* 確保 Header 區域本身也是橫向排列 */
+  flex-direction: row;
 }
 
+/* --- Brand Logo (猛健樂森友) --- */
 .nav-brand {
   text-decoration: none;
   font-weight: 800;
   font-size: 20px;
   color: var(--ac-brown-dark);
+
+  /* ⭐ 關鍵修改：強制橫排，不換行，垂直置中 ⭐ */
   display: flex;
   align-items: center;
+  flex-direction: row !important; /* 強制橫排 */
+  white-space: nowrap; /* 禁止文字換行 */
+
   gap: 8px;
   letter-spacing: 0.05em;
   transition: transform 0.2s ease;
-
-  /* CRITICAL: Prevent brand from becoming vertical */
-  white-space: nowrap;
 }
 
 .nav-brand:hover {
@@ -61,6 +64,8 @@
 
 .brand-icon {
   font-size: 24px;
+  display: inline-block; /* 確保 icon 不會跑版 */
+  line-height: 1; /* 修正垂直對齊 */
 }
 
 /* Main Navigation */
@@ -123,7 +128,7 @@
 }
 
 .nav-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .nav-icon-img {
@@ -138,17 +143,30 @@
   line-height: 1;
 }
 
+/* LINE Button */
 .nav-line-link {
   background-color: #fff;
   border: 2px solid var(--ac-green);
   color: var(--ac-green-dark);
 }
 
+/* Coffee Button (Bell Bag Style) */
 .nav-coffee-link {
-  background-color: #fff;
-  border: 2px solid var(--ac-yellow);
+  background-color: var(--ac-yellow);
+  border: 2px solid var(--ac-orange);
   color: var(--ac-brown-dark);
-  box-shadow: 0 2px 0 var(--ac-orange);
+  box-shadow: 0 3px 0 var(--ac-brown);
+}
+
+.nav-coffee-link:hover {
+  background-color: #ffeaa7;
+  transform: translateY(-2px) rotate(3deg);
+  box-shadow: 0 5px 0 var(--ac-brown);
+}
+
+.nav-coffee-link:active {
+  transform: translateY(3px);
+  box-shadow: none;
 }
 
 /* Hamburger Menu */
@@ -188,23 +206,20 @@
   .nav-container {
     flex-wrap: wrap;
   }
-
-  /* Make header row flexible but keep items in a row */
   .nav-header-row {
     width: 100%;
     justify-content: space-between;
-    flex-wrap: nowrap; /* CRITICAL: No wrapping inside header row */
   }
-
-  /* Slightly smaller font on mobile to prevent wrapping */
-  .nav-brand {
-    font-size: 18px;
-  }
-
   .nav-toggle {
     display: block;
   }
 
+  /* Mobile Brand Font Size */
+  .nav-brand {
+    font-size: 19px;
+  }
+
+  /* Mobile Menu Animation */
   .nav-main {
     display: none;
     width: 100%;
@@ -250,6 +265,7 @@
     transform: none;
   }
 
+  /* Floating Action Buttons on Mobile */
   .nav-actions {
     position: fixed;
     right: 16px;
@@ -262,7 +278,6 @@
 
   .nav-btn {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    background-color: #fff;
     height: 40px;
     padding: 0 16px;
     font-size: 13px;
@@ -271,6 +286,7 @@
 
   .nav-coffee-link {
     border-radius: 50px;
-    border: 2px solid var(--ac-yellow);
+    border: 2px solid var(--ac-orange);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 }

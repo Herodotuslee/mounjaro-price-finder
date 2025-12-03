@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import "../styles/PricePage.css";
-import { TYPE_LABELS, TYPES } from "../data/prices";
+import { TYPES } from "../data/prices";
 import texts from "../data/texts.json";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import PriceReportModal from "../components/PriceReportModal";
@@ -27,7 +27,6 @@ function PricePage() {
   const [error, setError] = useState(null);
 
   const [showAllDoses, setShowAllDoses] = useState(false);
-  // 💡 移除了這裡原本的 expandedNoteId state，因為我們決定直接顯示完整備註
 
   const [reportTarget, setReportTarget] = useState(null);
   const [reportSubmitting, setReportSubmitting] = useState(false);
@@ -208,6 +207,8 @@ function PricePage() {
                     ? "醫院"
                     : t === "pharmacy"
                     ? "藥局"
+                    : t === "medical_aesthetic"
+                    ? "醫美"
                     : t}
                 </button>
               ))}

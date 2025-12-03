@@ -2,6 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config/supabase";
 import texts from "../data/texts.json";
+// Import the shared theme variables and specific page styles
+import "../styles/PricePage.css";
+import "../styles/FaqPage.css";
+
 function FaqPage() {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,8 +33,8 @@ function FaqPage() {
         const data = await res.json();
         setFaqs(data);
       } catch (err) {
-        console.error("❌ FAQ 載入失敗：", err);
-        setError("無法載入 FAQ，請稍後再試。");
+        console.error("❌ FAQ Load Failed:", err);
+        setError("Unable to load FAQs. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -39,49 +43,46 @@ function FaqPage() {
     loadFaq();
   }, []);
 
-  if (loading) return <p></p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  // Simple loading state styling
+  if (loading) return <div className="ac-loading">Loading...</div>;
+  if (error) return <div className="status-text error">{error}</div>;
 
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: "0 auto" }}>
-      <header className="page-header">
-        <h1 className="page-title">猛健樂常見問題</h1>
-        <p className="page-subtitle">
-          這裡整理網友最常問的問題，方便快速查詢。
-        </p>
-      </header>
-      <div className="info-banner info-banner-warning">
-        {texts.generalWarning}
-      </div>
-
-      {faqs.map((item) => (
-        <details
-          key={item.id}
-          style={{
-            marginBottom: 12,
-            padding: "10px 14px",
-            borderRadius: 8,
-            border: "1px solid #e5e7eb",
-            background: "#fff",
-          }}
-        >
-          <summary style={{ cursor: "pointer", fontWeight: 600 }}>
-            {item.question}
-          </summary>
-
-          <p
-            style={{
-              marginTop: 6,
-              fontSize: 14,
-              color: "#374151",
-              whiteSpace: "pre-line",
-              lineHeight: 1.7,
-            }}
-          >
-            {item.answer}
+    <div className="price-page-root">
+      <div className="price-page-inner">
+        {/* --- Header --- */}
+        <header className="page-header">
+          <h1 className="page-title">
+            <span className="title-icon">❔</span> 常見問題
+          </h1>
+          <p className="page-subtitle-text">
+            這裡整理了島民們最常問的問題。
+            <br />
+            點擊卡片就可以看到詳細解答喔！
           </p>
-        </details>
-      ))}
+        </header>
+
+        {/* --- Warning Banner --- */}
+        <div className="info-banner warning-block">
+          <span className="icon">🦉</span> {texts.generalWarning}
+        </div>
+
+        {/* --- FAQ List --- */}
+        <div className="faq-list">
+          {faqs.map((item) => (
+            <details key={item.id} className="faq-card">
+              <summary className="faq-summary">
+                <span className="faq-icon">🍃</span>
+                {item.question}
+              </summary>
+
+              <div className="faq-content">
+                <p className="faq-answer">{item.answer}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

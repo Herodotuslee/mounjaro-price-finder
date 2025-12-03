@@ -16,7 +16,8 @@ function Navbar() {
         <div className="nav-header-row">
           <NavLink to="/" className="nav-brand" onClick={closeMenu}>
             <span className="brand-icon">🍃</span>
-            <span className="brand-text">台灣猛健樂資訊網</span>
+            {/* 更改網站名稱 */}
+            <span className="brand-text">猛健樂森友會</span>
           </NavLink>
 
           <button

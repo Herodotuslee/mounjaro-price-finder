@@ -1,0 +1,111 @@
+/* src/styles/loading-ac.css */
+
+/* 定義動森主題色變數 */
+:root {
+  --ac-green-light: #8fd48f; /* 淺綠色邊框 */
+  --ac-green-dark: #52a352; /* 深綠色圖標 */
+  --ac-cream: #fdfce0; /* 奶油色背景 */
+  --ac-brown: #5e4e3e; /* 深棕色文字 */
+  --ac-shadow: #70a970; /* 復古陰影色 */
+}
+
+/* 引入一個可愛的圓體字型，如果沒有則使用系統圓體 */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap");
+
+.ac-loading-root {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px; /* 圖標和文字的間距 */
+  padding: 16px 24px;
+  background-color: var(--ac-cream);
+  border: 4px solid var(--ac-green-light);
+  border-radius: 30px; /* 超圓潤的邊角 */
+  color: var(--ac-brown);
+  font-family: "Nunito", "Arial Rounded MT Bold", "PingFang TC", sans-serif;
+  font-weight: 700;
+  box-shadow: 4px 4px 0px var(--ac-shadow); /* 經典的復古硬陰影 */
+
+  /* 讓整個組件輕微浮動的動畫 */
+  animation: ac-float 3s ease-in-out infinite;
+}
+
+/* 置中模式 */
+.ac-loading-root-centered {
+  position: fixed; /* 或 absolute，視需求而定 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}
+
+/* 圖標容器 */
+.ac-loading-spinner-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 葉子圖標本體 */
+.ac-loading-icon {
+  color: var(--ac-green-dark);
+  /* 結合旋轉和輕微的縮放動畫 */
+  animation: ac-spin-wiggle 2.5s ease-in-out infinite;
+}
+
+/* 尺寸控制 */
+.ac-loading-icon-sm {
+  font-size: 24px; /* SVG 使用 em，所以這裡設 font-size */
+}
+
+.ac-loading-icon:not(.ac-loading-icon-sm) {
+  font-size: 40px; /* 預設 md 尺寸 */
+}
+
+/* 文字樣式 */
+.ac-loading-text {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+/* --- 動畫定義 --- */
+
+/* 葉子的旋轉與搖擺動畫 */
+@keyframes ac-spin-wiggle {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1); /* 轉到一半時稍微變大 */
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* 整體組件的輕微浮動動畫 */
+@keyframes ac-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    /* 如果是 centered 模式，需要保持置中的 transform */
+  }
+  50% {
+    /* 向上浮動 5px */
+    transform: translateY(-5px);
+  }
+}
+
+/* 修正：當 centered 模式時，浮動動畫需要考慮原本的 translate(-50%, -50%) */
+.ac-loading-root-centered.ac-loading-root {
+  animation-name: ac-float-centered;
+}
+
+@keyframes ac-float-centered {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-8px);
+  }
+}
