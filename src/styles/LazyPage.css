@@ -65,7 +65,7 @@
   font-weight: 800;
   color: var(--ac-brown-dark);
   margin-bottom: 16px;
-  background: var(--ac-green-light);
+  background: var(--ac-green);
   padding: 6px 20px;
   border-radius: 999px;
   border: 2px dashed var(--ac-green);
@@ -108,3 +108,5 @@
     top: -10px;
   }
 }
+
+/* --- 特定卡片標題配色 --- */

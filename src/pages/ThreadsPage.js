@@ -107,7 +107,7 @@ function ThreadsPage() {
         </header>
 
         {/* --- Tag Filters (Hidden on Mobile) --- */}
-        {!isMobile && allTags.length > 0 && (
+        {false && allTags.length > 0 && (
           <div className="tag-filter-container">
             <div className="tag-filter-label">依標籤瀏覽文章：</div>
 

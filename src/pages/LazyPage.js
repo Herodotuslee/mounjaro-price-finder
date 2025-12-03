@@ -28,7 +28,7 @@ function LazyPage() {
           <div className="tape-strip"></div>
 
           <div className="lazy-card-content">
-            <h2 className="lazy-card-title">🛒 購買指南</h2>
+            <h2 className="lazy-card-title title-buying">🛒 購買指南</h2>
             <img
               src="/image/buying.jpg"
               alt="猛健樂購買指南懶人包"
@@ -42,7 +42,7 @@ function LazyPage() {
           <div className="tape-strip"></div>
 
           <div className="lazy-card-content">
-            <h2 className="lazy-card-title">💉 使用攻略</h2>
+            <h2 className="lazy-card-title title-using">💉 使用攻略</h2>
             <img
               src="/image/using.png"
               alt="猛健樂使用方式懶人包"
